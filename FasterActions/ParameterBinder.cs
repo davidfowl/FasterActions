@@ -61,30 +61,38 @@ namespace Microsoft.AspNetCore.Http
             {
                 return new BodyParameterBinder<T>(parameterInfo.Name, bodyAttribute.AllowEmpty);
             }
-            else if (parameterInfo.CustomAttributes.Any(a => typeof(IFromServiceMetadata).IsAssignableFrom(a.AttributeType)))
+            else if (parameterCustomAttributes.Any(a => a is IFromServiceMetadata))
             {
                 return new ServicesParameterBinder<T>(parameterInfo.Name);
             }
-            else if (parameterInfo.ParameterType == typeof(HttpContext))
+            else if (typeof(T) == typeof(HttpContext))
             {
                 return new HttpContextParameterBinder<T>(parameterInfo.Name);
             }
-            else if (parameterInfo.ParameterType == typeof(CancellationToken))
+            else if (typeof(T) == typeof(CancellationToken))
             {
                 return new CancellationTokenParameterBinder<T>(parameterInfo.Name);
             }
-            else if (parameterInfo.ParameterType == typeof(string) || parameterInfo.ParameterType.IsPrimitive || HasTryParseMethod(parameterInfo))
+            else if (typeof(T) == typeof(string) ||
+                     typeof(T) == typeof(byte) ||
+                     typeof(T) == typeof(short) ||
+                     typeof(T) == typeof(int) ||
+                     typeof(T) == typeof(long) ||
+                     typeof(T) == typeof(decimal) ||
+                     typeof(T) == typeof(Guid) ||
+                     typeof(T) == typeof(DateTime) ||
+                     typeof(T) == typeof(DateTimeOffset) ||
+                     HasTryParseMethod())
             {
                 return new RouteOrQueryParameterBinder<T>(parameterInfo.Name);
             }
-            else if (parameterInfo.ParameterType.IsInterface)
+            else if (typeof(T).IsInterface)
             {
                 return new ServicesParameterBinder<T>(parameterInfo.Name);
             }
 
             return new BodyParameterBinder<T>(parameterInfo.Name, allowEmpty: false);
         }
-
 
         private static MethodInfo GetEnumTryParseMethod()
         {
@@ -146,9 +154,9 @@ namespace Microsoft.AspNetCore.Http
             return TryParseMethodCache.GetOrAdd(type, Finder);
         }
 
-        private static bool HasTryParseMethod(ParameterInfo parameter)
+        private static bool HasTryParseMethod()
         {
-            var nonNullableParameterType = Nullable.GetUnderlyingType(parameter.ParameterType) ?? parameter.ParameterType;
+            var nonNullableParameterType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
             return FindTryParseMethod(nonNullableParameterType) is not null;
         }
     }
@@ -176,7 +184,167 @@ namespace Microsoft.AspNetCore.Http
 
         public override bool TryBindValue(HttpContext httpContext, [MaybeNullWhen(false)] out T value)
         {
-            value = (T?)Convert.ChangeType(httpContext.Request.RouteValues[Name]?.ToString(), typeof(T));
+            var rawValue = httpContext.Request.RouteValues[Name]?.ToString();
+
+            if (typeof(T) == typeof(string))
+            {
+                value = (T?)(object?)rawValue;
+                return value != null;
+            }
+
+            if (typeof(T) == typeof(byte))
+            {
+                bool result = byte.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(byte?))
+            {
+                if (byte.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(short))
+            {
+                bool result = short.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(short?))
+            {
+                if (short.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(int))
+            {
+                bool result = int.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(int?))
+            {
+                if (int.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(long))
+            {
+                bool result = long.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(long?))
+            {
+                if (long.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(decimal))
+            {
+                bool result = decimal.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(decimal?))
+            {
+                if (decimal.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(Guid))
+            {
+                bool result = Guid.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(Guid?))
+            {
+                if (Guid.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(DateTime))
+            {
+                bool result = DateTime.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(DateTime?))
+            {
+                if (DateTime.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(DateTimeOffset))
+            {
+                bool result = DateTimeOffset.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(DateTimeOffset?))
+            {
+                if (DateTimeOffset.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            value = (T?)Convert.ChangeType(rawValue, typeof(T));
             return value != null;
         }
     }
@@ -203,6 +371,164 @@ namespace Microsoft.AspNetCore.Http
         {
             var rawValue = httpContext.Request.RouteValues[Name]?.ToString() ?? httpContext.Request.Query[Name].ToString();
 
+            if (typeof(T) == typeof(string))
+            {
+                value = (T)(object)rawValue;
+                return true;
+            }
+
+            if (typeof(T) == typeof(byte))
+            {
+                bool result = byte.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(byte?))
+            {
+                if (byte.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(short))
+            {
+                bool result = short.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(short?))
+            {
+                if (short.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(int))
+            {
+                bool result = int.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(int?))
+            {
+                if (int.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(long))
+            {
+                bool result = long.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(long?))
+            {
+                if (long.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(decimal))
+            {
+                bool result = decimal.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(decimal?))
+            {
+                if (decimal.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(Guid))
+            {
+                bool result = Guid.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(Guid?))
+            {
+                if (Guid.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(DateTime))
+            {
+                bool result = DateTime.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(DateTime?))
+            {
+                if (DateTime.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(DateTimeOffset))
+            {
+                bool result = DateTimeOffset.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(DateTimeOffset?))
+            {
+                if (DateTimeOffset.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
             value = (T)Convert.ChangeType(rawValue, typeof(T));
             return true;
         }
@@ -228,7 +554,167 @@ namespace Microsoft.AspNetCore.Http
 
         public override bool TryBindValue(HttpContext httpContext, [MaybeNullWhen(false)] out T value)
         {
-            value = (T)Convert.ChangeType(httpContext.Request.Query[Name].ToString(), typeof(T));
+            var rawValue = httpContext.Request.Query[Name].ToString();
+
+            if (typeof(T) == typeof(string))
+            {
+                value = (T)(object)rawValue;
+                return true;
+            }
+
+            if (typeof(T) == typeof(byte))
+            {
+                bool result = byte.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(byte?))
+            {
+                if (byte.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(short))
+            {
+                bool result = short.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(short?))
+            {
+                if (short.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(int))
+            {
+                bool result = int.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(int?))
+            {
+                if (int.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(long))
+            {
+                bool result = long.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(long?))
+            {
+                if (long.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(decimal))
+            {
+                bool result = decimal.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(decimal?))
+            {
+                if (decimal.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(Guid))
+            {
+                bool result = Guid.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(Guid?))
+            {
+                if (Guid.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(DateTime))
+            {
+                bool result = DateTime.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(DateTime?))
+            {
+                if (DateTime.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(DateTimeOffset))
+            {
+                bool result = DateTimeOffset.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(DateTimeOffset?))
+            {
+                if (DateTimeOffset.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            value = (T)Convert.ChangeType(rawValue, typeof(T));
             return true;
         }
     }
@@ -253,7 +739,161 @@ namespace Microsoft.AspNetCore.Http
 
         public override bool TryBindValue(HttpContext httpContext, [MaybeNullWhen(false)] out T value)
         {
-            value = (T)Convert.ChangeType(httpContext.Request.Headers[Name].ToString(), typeof(T));
+            var rawValue = httpContext.Request.Query[Name].ToString();
+
+            if (typeof(T) == typeof(byte))
+            {
+                bool result = byte.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(byte?))
+            {
+                if (byte.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(short))
+            {
+                bool result = short.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(short?))
+            {
+                if (short.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(int))
+            {
+                bool result = int.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(int?))
+            {
+                if (int.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(long))
+            {
+                bool result = long.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(long?))
+            {
+                if (long.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(decimal))
+            {
+                bool result = decimal.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(decimal?))
+            {
+                if (decimal.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(Guid))
+            {
+                bool result = Guid.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(Guid?))
+            {
+                if (Guid.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(DateTime))
+            {
+                bool result = DateTime.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(DateTime?))
+            {
+                if (DateTime.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(DateTimeOffset))
+            {
+                bool result = DateTimeOffset.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(DateTimeOffset?))
+            {
+                if (DateTimeOffset.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            value = (T)Convert.ChangeType(rawValue, typeof(T));
             return true;
         }
     }
