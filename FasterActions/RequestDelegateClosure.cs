@@ -171,7 +171,7 @@ namespace Microsoft.AspNetCore.Http
                 return Task.CompletedTask;
             }
 
-            R? result = _delegate(arg0!, arg1!);
+            R? result = _delegate(arg0, arg1);
 
             return _resultInvoker.Invoke(httpContext, result!);
         }
