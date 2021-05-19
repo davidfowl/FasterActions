@@ -41,37 +41,64 @@ namespace Microsoft.AspNetCore.Http
                 throw new NotSupportedException("Parameter must have a name");
             }
 
-            var parameterCustomAttributes = parameterInfo.GetCustomAttributes();
+            var parameterCustomAttributes = Attribute.GetCustomAttributes(parameterInfo);
 
-            // TODO: This is missing support for calling a custom TryParse methods
+            // No attributes fast path
+            if (parameterCustomAttributes.Length == 0)
+            {
+                if (TryBindParameterBasedOnType(parameterInfo, out var parameterBinder))
+                {
+                    return parameterBinder;
+                }
 
+                return new BodyParameterBinder<T>(parameterInfo.Name, allowEmpty: false);
+            }
+
+            return BindParameterWithAttributes(parameterInfo, parameterCustomAttributes);
+        }
+
+        private static ParameterBinder<T> BindParameterWithAttributes(ParameterInfo parameterInfo, Attribute[] parameterCustomAttributes)
+        {
             if (parameterCustomAttributes.OfType<IFromRouteMetadata>().FirstOrDefault() is { } routeAttribute)
             {
-                return new RouteParameterBinder<T>(routeAttribute.Name ?? parameterInfo.Name);
+                return new RouteParameterBinder<T>(routeAttribute.Name ?? parameterInfo.Name!);
             }
             else if (parameterCustomAttributes.OfType<IFromQueryMetadata>().FirstOrDefault() is { } queryAttribute)
             {
-                return new QueryParameterBinder<T>(queryAttribute.Name ?? parameterInfo.Name);
+                return new QueryParameterBinder<T>(queryAttribute.Name ?? parameterInfo.Name!);
             }
             else if (parameterCustomAttributes.OfType<IFromHeaderMetadata>().FirstOrDefault() is { } headerAttribute)
             {
-                return new HeaderParameterBinder<T>(headerAttribute.Name ?? parameterInfo.Name);
+                return new HeaderParameterBinder<T>(headerAttribute.Name ?? parameterInfo.Name!);
             }
             else if (parameterCustomAttributes.OfType<IFromBodyMetadata>().FirstOrDefault() is { } bodyAttribute)
             {
-                return new BodyParameterBinder<T>(parameterInfo.Name, bodyAttribute.AllowEmpty);
+                return new BodyParameterBinder<T>(parameterInfo.Name!, bodyAttribute.AllowEmpty);
             }
             else if (parameterCustomAttributes.Any(a => a is IFromServiceMetadata))
             {
-                return new ServicesParameterBinder<T>(parameterInfo.Name);
+                return new ServicesParameterBinder<T>(parameterInfo.Name!);
             }
-            else if (typeof(T) == typeof(HttpContext))
+            else if (TryBindParameterBasedOnType(parameterInfo, out var parameterBinder))
             {
-                return new HttpContextParameterBinder<T>(parameterInfo.Name);
+                return parameterBinder;
+            }
+
+            return new BodyParameterBinder<T>(parameterInfo.Name!, allowEmpty: false);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool TryBindParameterBasedOnType(ParameterInfo parameterInfo, [MaybeNullWhen(false)] out ParameterBinder<T> parameterBinder)
+        {
+            if (typeof(T) == typeof(HttpContext))
+            {
+                parameterBinder = new HttpContextParameterBinder<T>(parameterInfo.Name!);
+                return true;
             }
             else if (typeof(T) == typeof(CancellationToken))
             {
-                return new CancellationTokenParameterBinder<T>(parameterInfo.Name);
+                parameterBinder = new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
+                return true;
             }
             else if (typeof(T) == typeof(string) ||
                      typeof(T) == typeof(byte) ||
@@ -84,14 +111,17 @@ namespace Microsoft.AspNetCore.Http
                      typeof(T) == typeof(DateTimeOffset) ||
                      HasTryParseMethod())
             {
-                return new RouteOrQueryParameterBinder<T>(parameterInfo.Name);
+                parameterBinder = new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
+                return true;
             }
             else if (typeof(T).IsInterface)
             {
-                return new ServicesParameterBinder<T>(parameterInfo.Name);
+                parameterBinder = new ServicesParameterBinder<T>(parameterInfo.Name!);
+                return true;
             }
 
-            return new BodyParameterBinder<T>(parameterInfo.Name, allowEmpty: false);
+            parameterBinder = default;
+            return false;
         }
 
         private static MethodInfo GetEnumTryParseMethod()
