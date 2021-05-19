@@ -21,10 +21,6 @@ namespace Microsoft.AspNetCore.Http
             {
                 return CompletedTaskResultInvoker<T>.Instance;
             }
-            else if (typeof(T).IsAssignableTo(typeof(IResult)))
-            {
-                return IResultInvoker<T>.Instance;
-            }
             else if (typeof(T) == typeof(string))
             {
                 return StringResultInvoker<T>.Instance;
@@ -37,7 +33,6 @@ namespace Microsoft.AspNetCore.Http
             {
                 return ValueTaskInvoker<T>.Instance;
             }
-
             else if (typeof(T).IsGenericType &&
                 typeof(T).GetGenericTypeDefinition() == typeof(Task<>))
             {
@@ -87,6 +82,10 @@ namespace Microsoft.AspNetCore.Http
                     var type = typeof(ValueTaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
                     return (ResultInvoker<T>)Activator.CreateInstance(type)!;
                 }
+            }
+            else if (typeof(T).IsAssignableTo(typeof(IResult)))
+            {
+                return IResultInvoker<T>.Instance;
             }
 
             return DefaultInvoker<T>.Instance;
