@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Http
@@ -13,6 +14,7 @@ namespace Microsoft.AspNetCore.Http
         public abstract Task Invoke(HttpContext httpContext, T? result);
 
         // Ideally this would be inlinable so the JIT can de-virtualize
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ResultInvoker<T> Create()
         {
             if (typeof(T) == typeof(void))

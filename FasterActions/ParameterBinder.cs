@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.Metadata;
@@ -32,6 +33,7 @@ namespace Microsoft.AspNetCore.Http
 
         // This needs to be inlinable in order for the JIT to see the newobj call in order
         // to enable devirtualization the method might currently be too big for this...
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ParameterBinder<T> Create(ParameterInfo parameterInfo)
         {
             if (parameterInfo.Name is null)
