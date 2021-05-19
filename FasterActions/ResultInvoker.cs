@@ -21,19 +21,19 @@ namespace Microsoft.AspNetCore.Http
             }
             else if (typeof(T).IsAssignableTo(typeof(IResult)))
             {
-                return ExecuteIResultInvoker<T>.Instance;
+                return IResultInvoker<T>.Instance;
             }
             else if (typeof(T) == typeof(string))
             {
-                return ExecuteStringInvoker<T>.Instance;
+                return StringResultInvoker<T>.Instance;
             }
             else if (typeof(T) == typeof(Task))
             {
-                return ExecuteTaskInvoker<T>.Instance;
+                return TaskInvoker<T>.Instance;
             }
             else if (typeof(T) == typeof(ValueTask))
             {
-                return ExecuteValueTaskInvoker<T>.Instance;
+                return ValueTaskInvoker<T>.Instance;
             }
 
             else if (typeof(T).IsGenericType &&
@@ -44,12 +44,12 @@ namespace Microsoft.AspNetCore.Http
                 // Task<IResult> 
                 if (resultType == typeof(IResult))
                 {
-                    return ExecuteTaskOfIResultInvoker<T>.Instance;
+                    return TaskOfIResultInvoker<T>.Instance;
                 }
                 // Task<string> 
                 else if (resultType == typeof(string))
                 {
-                    return ExecuteTaskOfStringInvoker<T>.Instance;
+                    return TaskOfStringInvoker<T>.Instance;
                 }
                 else
                 {
@@ -57,7 +57,7 @@ namespace Microsoft.AspNetCore.Http
                     // We need to use MakeGeneric method to get the correct version of the method to call
                     // this is still a gap with safe native AOT support.
 
-                    var type = typeof(ExecuteGenericTaskInvoker<,>).MakeGenericType(typeof(T), resultType);
+                    var type = typeof(TaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
                     return (ResultInvoker<T>)Activator.CreateInstance(type)!;
                 }
             }
@@ -69,12 +69,12 @@ namespace Microsoft.AspNetCore.Http
                 // ValueTask<IResult> 
                 if (resultType == typeof(IResult))
                 {
-                    return ExecuteValueTaskOfIResultInvoker<T>.Instance;
+                    return ValueTaskOfIResultInvoker<T>.Instance;
                 }
                 // ValueTask<string> 
                 else if (resultType == typeof(string))
                 {
-                    return ExecuteValueTaskOfStringInvoker<T>.Instance;
+                    return ValueTaskOfStringInvoker<T>.Instance;
                 }
                 else
                 {
@@ -82,12 +82,12 @@ namespace Microsoft.AspNetCore.Http
                     // We need to use MakeGeneric method to get the correct version of the method to call
                     // this is still a gap with safe native AOT support.
 
-                    var type = typeof(ExecuteGenericValueTaskInvoker<,>).MakeGenericType(typeof(T), resultType);
+                    var type = typeof(ValueTaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
                     return (ResultInvoker<T>)Activator.CreateInstance(type)!;
                 }
             }
 
-            return ExecuteDefaultInvoker<T>.Instance;
+            return DefaultInvoker<T>.Instance;
         }
     }
 
@@ -101,9 +101,9 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
-    sealed class ExecuteIResultInvoker<T> : ResultInvoker<T>
+    sealed class IResultInvoker<T> : ResultInvoker<T>
     {
-        public static readonly ExecuteIResultInvoker<T> Instance = new();
+        public static readonly IResultInvoker<T> Instance = new();
 
         public override Task Invoke(HttpContext httpContext, T? result)
         {
@@ -111,9 +111,9 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
-    sealed class ExecuteStringInvoker<T> : ResultInvoker<T>
+    sealed class StringResultInvoker<T> : ResultInvoker<T>
     {
-        public static readonly ExecuteStringInvoker<T> Instance = new();
+        public static readonly StringResultInvoker<T> Instance = new();
 
         public override Task Invoke(HttpContext httpContext, T? result)
         {
@@ -121,57 +121,65 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
-    sealed class ExecuteTaskInvoker<T> : ResultInvoker<T>
+    sealed class TaskInvoker<T> : ResultInvoker<T>
     {
-        public static readonly ExecuteTaskInvoker<T> Instance = new();
+        public static readonly TaskInvoker<T> Instance = new();
 
         public override Task Invoke(HttpContext httpContext, T? result)
         {
+            if (result == null) throw new ArgumentNullException(nameof(result));
+
             return (Task)(object)result;
         }
     }
 
-    sealed class ExecuteValueTaskInvoker<T> : ResultInvoker<T>
+    sealed class ValueTaskInvoker<T> : ResultInvoker<T>
     {
-        public static readonly ExecuteValueTaskInvoker<T> Instance = new();
+        public static readonly ValueTaskInvoker<T> Instance = new();
 
         public override Task Invoke(HttpContext httpContext, T? result)
         {
-            return ((ValueTask)(object)result).AsTask();
+            return ((ValueTask)(object)result!).AsTask();
         }
     }
 
-    sealed class ExecuteTaskOfIResultInvoker<T> : ResultInvoker<T>
+    sealed class TaskOfIResultInvoker<T> : ResultInvoker<T>
     {
-        public static readonly ExecuteTaskOfIResultInvoker<T> Instance = new();
+        public static readonly TaskOfIResultInvoker<T> Instance = new();
 
         public override async Task Invoke(HttpContext httpContext, T? result)
         {
-            await (await (Task<IResult>)(object)result!).ExecuteAsync(httpContext);
+            if (result == null) throw new ArgumentNullException(nameof(result));
+
+            await (await (Task<IResult>)(object)result).ExecuteAsync(httpContext);
         }
     }
 
-    sealed class ExecuteTaskOfStringInvoker<T> : ResultInvoker<T>
+    sealed class TaskOfStringInvoker<T> : ResultInvoker<T>
     {
-        public static readonly ExecuteTaskOfStringInvoker<T> Instance = new();
+        public static readonly TaskOfStringInvoker<T> Instance = new();
 
         public override async Task Invoke(HttpContext httpContext, T? result)
         {
-            await httpContext.Response.WriteAsync(await (Task<string>)(object)result!);
+            if (result == null) throw new ArgumentNullException(nameof(result));
+
+            await httpContext.Response.WriteAsync(await (Task<string>)(object)result);
         }
     }
 
-    sealed class ExecuteGenericTaskInvoker<T, TaskResult> : ResultInvoker<T>
+    sealed class TaskOfTInvoker<T, TaskResult> : ResultInvoker<T>
     {
         public override async Task Invoke(HttpContext httpContext, T? result)
         {
-            await httpContext.Response.WriteAsJsonAsync(await (Task<TaskResult>)(object)result!);
+            if (result == null) throw new ArgumentNullException(nameof(result));
+
+            await httpContext.Response.WriteAsJsonAsync(await (Task<TaskResult>)(object)result);
         }
     }
 
-    sealed class ExecuteValueTaskOfIResultInvoker<T> : ResultInvoker<T>
+    sealed class ValueTaskOfIResultInvoker<T> : ResultInvoker<T>
     {
-        public static readonly ExecuteValueTaskOfIResultInvoker<T> Instance = new();
+        public static readonly ValueTaskOfIResultInvoker<T> Instance = new();
 
         public override async Task Invoke(HttpContext httpContext, T? result)
         {
@@ -179,9 +187,9 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
-    sealed class ExecuteValueTaskOfStringInvoker<T> : ResultInvoker<T>
+    sealed class ValueTaskOfStringInvoker<T> : ResultInvoker<T>
     {
-        public static readonly ExecuteValueTaskOfStringInvoker<T> Instance = new();
+        public static readonly ValueTaskOfStringInvoker<T> Instance = new();
 
         public override async Task Invoke(HttpContext httpContext, T? result)
         {
@@ -189,7 +197,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
-    sealed class ExecuteGenericValueTaskInvoker<T, TaskResult> : ResultInvoker<T>
+    sealed class ValueTaskOfTInvoker<T, TaskResult> : ResultInvoker<T>
     {
         public override async Task Invoke(HttpContext httpContext, T? result)
         {
@@ -197,9 +205,9 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
-    sealed class ExecuteDefaultInvoker<T> : ResultInvoker<T>
+    sealed class DefaultInvoker<T> : ResultInvoker<T>
     {
-        public static readonly ExecuteDefaultInvoker<T> Instance = new();
+        public static readonly DefaultInvoker<T> Instance = new();
 
         public override Task Invoke(HttpContext httpContext, T? result)
         {

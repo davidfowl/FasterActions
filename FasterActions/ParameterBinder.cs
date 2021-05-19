@@ -174,8 +174,8 @@ namespace Microsoft.AspNetCore.Http
 
         public override bool TryBindValue(HttpContext httpContext, [MaybeNullWhen(false)] out T value)
         {
-            value = (T)Convert.ChangeType(httpContext.Request.RouteValues[Name]?.ToString(), typeof(T));
-            return true;
+            value = (T?)Convert.ChangeType(httpContext.Request.RouteValues[Name]?.ToString(), typeof(T));
+            return value != null;
         }
     }
 
@@ -256,7 +256,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
-    sealed class ServicesParameterBinder<T> : ParameterBinder<T> where T : notnull
+    sealed class ServicesParameterBinder<T> : ParameterBinder<T>
     {
         public ServicesParameterBinder(string name)
         {
@@ -269,12 +269,16 @@ namespace Microsoft.AspNetCore.Http
 
         public override ValueTask<(T?, bool)> BindBodyOrValueAsync(HttpContext httpContext)
         {
+#pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
             return new((httpContext.RequestServices.GetRequiredService<T>(), true));
+#pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
         }
 
         public override bool TryBindValue(HttpContext httpContext, [MaybeNullWhen(false)] out T value)
         {
+#pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
             value = httpContext.RequestServices.GetRequiredService<T>();
+#pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
             return true;
         }
     }
@@ -386,7 +390,7 @@ namespace Microsoft.AspNetCore.Http
                 _requestBodyInvalidDataException(GetLogger(httpContext), exception);
             }
 
-            public static void ParameterBindingFailed<T>(HttpContext httpContext, ParameterBinder<T> binder)
+            public static void ParameterBindingFailed(HttpContext httpContext, ParameterBinder<T> binder)
             {
                 _parameterBindingFailed(GetLogger(httpContext), typeof(T).Name, binder.Name, "", null);
             }
