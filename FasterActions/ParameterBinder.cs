@@ -57,6 +57,7 @@ namespace Microsoft.AspNetCore.Http
             return BindParameterWithAttributes(parameterInfo, parameterCustomAttributes);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static ParameterBinder<T> BindParameterWithAttributes(ParameterInfo parameterInfo, Attribute[] parameterCustomAttributes)
         {
             if (parameterCustomAttributes.OfType<IFromRouteMetadata>().FirstOrDefault() is { } routeAttribute)
@@ -98,8 +99,7 @@ namespace Microsoft.AspNetCore.Http
                 typeof(T) == typeof(decimal) ||
                 typeof(T) == typeof(Guid) ||
                 typeof(T) == typeof(DateTime) ||
-                typeof(T) == typeof(DateTimeOffset) ||
-                HasTryParseMethod())
+                typeof(T) == typeof(DateTimeOffset))
             {
                 parameterBinder = new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
                 return true;
@@ -117,6 +117,11 @@ namespace Microsoft.AspNetCore.Http
             else if (typeof(T) == typeof(CancellationToken))
             {
                 parameterBinder = new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
+                return true;
+            }
+            else if (HasTryParseMethod())
+            {
+                parameterBinder = new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
                 return true;
             }
 

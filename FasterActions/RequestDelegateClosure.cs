@@ -39,6 +39,7 @@ namespace Microsoft.AspNetCore.Http
         {
             T0? arg0;
 
+            // Ideally this call would be inlined by the JIT but that would require dynamic PGO
             if (!_parameterBinder.TryBindValue(httpContext, out arg0))
             {
                 ParameterLog.ParameterBindingFailed(httpContext, _parameterBinder);
@@ -106,6 +107,7 @@ namespace Microsoft.AspNetCore.Http
         {
             T0? arg0;
 
+            // Ideally this call would be inlined by the JIT but that would require dynamic PGO
             if (!_parameterBinder.TryBindValue(httpContext, out arg0))
             {
                 ParameterLog.ParameterBindingFailed(httpContext, _parameterBinder);
