@@ -36,11 +36,6 @@ namespace Microsoft.AspNetCore.Http
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ParameterBinder<T> Create(ParameterInfo parameterInfo)
         {
-            if (parameterInfo.Name is null)
-            {
-                throw new NotSupportedException("Parameter must have a name");
-            }
-
             var parameterCustomAttributes = Attribute.GetCustomAttributes(parameterInfo);
 
             // No attributes fast path
@@ -51,7 +46,7 @@ namespace Microsoft.AspNetCore.Http
                     return parameterBinder;
                 }
 
-                return new BodyParameterBinder<T>(parameterInfo.Name, allowEmpty: false);
+                return new BodyParameterBinder<T>(parameterInfo.Name!, allowEmpty: false);
             }
 
             return BindParameterWithAttributes(parameterInfo, parameterCustomAttributes);
@@ -60,17 +55,22 @@ namespace Microsoft.AspNetCore.Http
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static ParameterBinder<T> BindParameterWithAttributes(ParameterInfo parameterInfo, Attribute[] parameterCustomAttributes)
         {
+            if (parameterInfo.Name is null)
+            {
+                throw new NotSupportedException("Parameter must have a name");
+            }
+
             if (parameterCustomAttributes.OfType<IFromRouteMetadata>().FirstOrDefault() is { } routeAttribute)
             {
-                return new RouteParameterBinder<T>(routeAttribute.Name ?? parameterInfo.Name!);
+                return new RouteParameterBinder<T>(routeAttribute.Name ?? parameterInfo.Name);
             }
             else if (parameterCustomAttributes.OfType<IFromQueryMetadata>().FirstOrDefault() is { } queryAttribute)
             {
-                return new QueryParameterBinder<T>(queryAttribute.Name ?? parameterInfo.Name!);
+                return new QueryParameterBinder<T>(queryAttribute.Name ?? parameterInfo.Name);
             }
             else if (parameterCustomAttributes.OfType<IFromHeaderMetadata>().FirstOrDefault() is { } headerAttribute)
             {
-                return new HeaderParameterBinder<T>(headerAttribute.Name ?? parameterInfo.Name!);
+                return new HeaderParameterBinder<T>(headerAttribute.Name ?? parameterInfo.Name);
             }
             else if (parameterCustomAttributes.OfType<IFromBodyMetadata>().FirstOrDefault() is { } bodyAttribute)
             {
@@ -78,14 +78,14 @@ namespace Microsoft.AspNetCore.Http
             }
             else if (parameterCustomAttributes.Any(a => a is IFromServiceMetadata))
             {
-                return new ServicesParameterBinder<T>(parameterInfo.Name!);
+                return new ServicesParameterBinder<T>(parameterInfo.Name);
             }
             else if (TryBindParameterBasedOnType(parameterInfo, out var parameterBinder))
             {
                 return parameterBinder;
             }
 
-            return new BodyParameterBinder<T>(parameterInfo.Name!, allowEmpty: false);
+            return new BodyParameterBinder<T>(parameterInfo.Name, allowEmpty: false);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,6 +97,8 @@ namespace Microsoft.AspNetCore.Http
                 typeof(T) == typeof(int) ||
                 typeof(T) == typeof(long) ||
                 typeof(T) == typeof(decimal) ||
+                typeof(T) == typeof(double) ||
+                typeof(T) == typeof(float) ||
                 typeof(T) == typeof(Guid) ||
                 typeof(T) == typeof(DateTime) ||
                 typeof(T) == typeof(DateTimeOffset))
@@ -119,7 +121,7 @@ namespace Microsoft.AspNetCore.Http
                 parameterBinder = new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
                 return true;
             }
-            else if (HasTryParseMethod())
+            else if (HasTryParseMethod()) // Slow fallback for unknown types
             {
                 parameterBinder = new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
                 return true;
@@ -294,6 +296,44 @@ namespace Microsoft.AspNetCore.Http
             if (typeof(T) == typeof(long?))
             {
                 if (long.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(double))
+            {
+                bool result = double.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(double?))
+            {
+                if (double.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(float))
+            {
+                bool result = float.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(float?))
+            {
+                if (float.TryParse(rawValue, out var parsedValue))
                 {
                     value = (T)(object)parsedValue;
                     return true;
@@ -488,6 +528,44 @@ namespace Microsoft.AspNetCore.Http
                 return false;
             }
 
+            if (typeof(T) == typeof(double))
+            {
+                bool result = double.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(double?))
+            {
+                if (double.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(float))
+            {
+                bool result = float.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(float?))
+            {
+                if (float.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
             if (typeof(T) == typeof(decimal))
             {
                 bool result = decimal.TryParse(rawValue, out var parsedValue);
@@ -664,6 +742,44 @@ namespace Microsoft.AspNetCore.Http
             if (typeof(T) == typeof(long?))
             {
                 if (long.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(double))
+            {
+                bool result = double.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(double?))
+            {
+                if (double.TryParse(rawValue, out var parsedValue))
+                {
+                    value = (T)(object)parsedValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (typeof(T) == typeof(float))
+            {
+                bool result = float.TryParse(rawValue, out var parsedValue);
+                value = (T)(object)parsedValue;
+                return result;
+            }
+
+            if (typeof(T) == typeof(float?))
+            {
+                if (float.TryParse(rawValue, out var parsedValue))
                 {
                     value = (T)(object)parsedValue;
                     return true;
