@@ -3,6 +3,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Metadata;
 
 namespace Microsoft.AspNetCore.Http
 {
@@ -15,12 +16,40 @@ namespace Microsoft.AspNetCore.Http
 
         public static RequestDelegate CreateRequestDelegate<T0, R>(Func<T0, R> func)
         {
-            return CreateRequestDelegateCore(new FuncRequestDelegateClosure<T0, R>(func, func.Method.GetParameters()));
+            var parameters = func.Method.GetParameters();
+
+            RequestDelegateClosure closure = HasBindingAttributes(parameters) ?
+                new TypeOnlyFuncDelegateClosure<T0, R>(func, parameters) :
+                new FuncRequestDelegateClosure<T0, R>(func, parameters);
+
+            return CreateRequestDelegateCore(closure);
         }
 
         public static RequestDelegate CreateRequestDelegate<T0, T1, R>(Func<T0, T1, R> func)
         {
-            return CreateRequestDelegateCore(new FuncRequestDelegateClosure<T0, T1, R>(func, func.Method.GetParameters()));
+            var parameters = func.Method.GetParameters();
+
+            RequestDelegateClosure closure = HasBindingAttributes(parameters) ?
+                new TypeOnlyFuncDelegateClosure<T0, T1, R>(func, parameters) :
+                new FuncRequestDelegateClosure<T0, T1, R>(func, parameters);
+
+            return CreateRequestDelegateCore(closure);
+        }
+
+        private static bool HasBindingAttributes(ParameterInfo[] parameterInfos)
+        {
+            foreach (var parameterInfo in parameterInfos)
+            {
+                foreach (var a in Attribute.GetCustomAttributes(parameterInfo))
+                {
+                    if (a is IFromRouteMetadata or IFromQueryMetadata or IFromHeaderMetadata or IFromServiceMetadata or IFromBodyMetadata)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         // This overload isn't linker friendly
@@ -28,6 +57,7 @@ namespace Microsoft.AspNetCore.Http
         {
             var parameters = method.GetParameters();
             var parameterTypes = new Type[parameters.Length];
+            bool hasAttributes = HasBindingAttributes(parameters);
             for (int i = 0; i < parameterTypes.Length; i++)
             {
                 parameterTypes[i] = parameters[i].ParameterType;
@@ -59,7 +89,8 @@ namespace Microsoft.AspNetCore.Http
                 }
                 else if (parameterTypes.Length == 1)
                 {
-                    var type = typeof(FuncRequestDelegateClosure<,>).MakeGenericType(methodInvokerTypes);
+                    var type = hasAttributes ? typeof(FuncRequestDelegateClosure<,>).MakeGenericType(methodInvokerTypes) :
+                                               typeof(TypeOnlyFuncDelegateClosure<,>).MakeGenericType(methodInvokerTypes);
 
                     var @delegate = method.CreateDelegate(typeof(Func<,>).MakeGenericType(methodInvokerTypes));
 

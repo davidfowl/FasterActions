@@ -19,5 +19,5 @@ app.Run();
 
 class Foo
 {
-    public static object Hello() => new { Message = "Hello World" };
+    public static object Hello(string name) => new { Message = $"Hello {name}" };
 }

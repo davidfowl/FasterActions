@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -29,7 +28,68 @@ namespace Microsoft.AspNetCore.Http
         public abstract ValueTask<(T?, bool)> BindBodyOrValueAsync(HttpContext httpContext);
 
         private static readonly MethodInfo EnumTryParseMethod = GetEnumTryParseMethod();
-        private static readonly ConcurrentDictionary<Type, MethodInfo?> TryParseMethodCache = new();
+        private static readonly bool _hasTryParseMethod = HasTryParseMethod();
+
+        public static bool HasBodyBasedOnType =>
+                typeof(T) != typeof(string) &&
+                typeof(T) != typeof(byte) &&
+                typeof(T) != typeof(short) &&
+                typeof(T) != typeof(int) &&
+                typeof(T) != typeof(long) &&
+                typeof(T) != typeof(decimal) &&
+                typeof(T) != typeof(double) &&
+                typeof(T) != typeof(float) &&
+                typeof(T) != typeof(Guid) &&
+                typeof(T) != typeof(DateTime) &&
+                typeof(T) != typeof(DateTimeOffset) &&
+                typeof(T) != typeof(HttpContext) &&
+                typeof(T) != typeof(CancellationToken) &&
+                !typeof(T).IsInterface &&
+                !_hasTryParseMethod;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryBindValueBasedOnType(HttpContext httpContext, string name, [MaybeNullWhen(false)] out T value)
+        {
+            if (typeof(T) == typeof(string) ||
+                typeof(T) == typeof(byte) ||
+                typeof(T) == typeof(short) ||
+                typeof(T) == typeof(int) ||
+                typeof(T) == typeof(long) ||
+                typeof(T) == typeof(decimal) ||
+                typeof(T) == typeof(double) ||
+                typeof(T) == typeof(float) ||
+                typeof(T) == typeof(Guid) ||
+                typeof(T) == typeof(DateTime) ||
+                typeof(T) == typeof(DateTimeOffset))
+            {
+                return RouteOrQueryParameterBinder<T>.TryBindValue(httpContext, name, out value);
+            }
+            else if (typeof(T) == typeof(HttpContext))
+            {
+                return HttpContextParameterBinder<T>.TryBindValue(httpContext, name, out value);
+            }
+            else if (typeof(T).IsInterface)
+            {
+                return ServicesParameterBinder<T>.TryBindValue(httpContext, name, out value);
+            }
+            else if (typeof(T) == typeof(CancellationToken))
+            {
+                return CancellationTokenParameterBinder<T>.TryBindValue(httpContext, name, out value);
+            }
+            else if (_hasTryParseMethod) // Slow fallback for unknown types
+            {
+                return RouteOrQueryParameterBinder<T>.TryBindValue(httpContext, name, out value);
+            }
+
+            value = default;
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ValueTask<(T?, bool)> BindBodyBasedOnType(HttpContext httpContext, string name)
+        {
+            return BodyParameterBinder<T>.BindBodyOrValueAsync(httpContext, name);
+        }
 
         // This needs to be inlinable in order for the JIT to see the newobj call in order
         // to enable devirtualization the method might currently be too big for this...
@@ -41,19 +101,14 @@ namespace Microsoft.AspNetCore.Http
             // No attributes fast path
             if (parameterCustomAttributes.Length == 0)
             {
-                if (TryBindParameterBasedOnType(parameterInfo, out var parameterBinder))
-                {
-                    return parameterBinder;
-                }
-
-                return new BodyParameterBinder<T>(parameterInfo.Name!, allowEmpty: false);
+                return GetParameterBinderBaseOnType(parameterInfo);
             }
 
-            return BindParameterWithAttributes(parameterInfo, parameterCustomAttributes);
+            return GetBinderBaseOnAttributes(parameterInfo, parameterCustomAttributes);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static ParameterBinder<T> BindParameterWithAttributes(ParameterInfo parameterInfo, Attribute[] parameterCustomAttributes)
+        private static ParameterBinder<T> GetBinderBaseOnAttributes(ParameterInfo parameterInfo, Attribute[] parameterCustomAttributes)
         {
             if (parameterCustomAttributes.OfType<IFromRouteMetadata>().FirstOrDefault() is { } routeAttribute)
             {
@@ -75,16 +130,12 @@ namespace Microsoft.AspNetCore.Http
             {
                 return new ServicesParameterBinder<T>(parameterInfo.Name!);
             }
-            else if (TryBindParameterBasedOnType(parameterInfo, out var parameterBinder))
-            {
-                return parameterBinder;
-            }
 
-            return new BodyParameterBinder<T>(parameterInfo.Name!, allowEmpty: false);
+            return GetParameterBinderBaseOnType(parameterInfo);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool TryBindParameterBasedOnType(ParameterInfo parameterInfo, [MaybeNullWhen(false)] out ParameterBinder<T> parameterBinder)
+        private static ParameterBinder<T> GetParameterBinderBaseOnType(ParameterInfo parameterInfo)
         {
             if (typeof(T) == typeof(string) ||
                 typeof(T) == typeof(byte) ||
@@ -98,32 +149,26 @@ namespace Microsoft.AspNetCore.Http
                 typeof(T) == typeof(DateTime) ||
                 typeof(T) == typeof(DateTimeOffset))
             {
-                parameterBinder = new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
-                return true;
+                return new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
             }
             else if (typeof(T) == typeof(HttpContext))
             {
-                parameterBinder = new HttpContextParameterBinder<T>(parameterInfo.Name!);
-                return true;
+                return new HttpContextParameterBinder<T>(parameterInfo.Name!);
             }
             else if (typeof(T).IsInterface)
             {
-                parameterBinder = new ServicesParameterBinder<T>(parameterInfo.Name!);
-                return true;
+                return new ServicesParameterBinder<T>(parameterInfo.Name!);
             }
             else if (typeof(T) == typeof(CancellationToken))
             {
-                parameterBinder = new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
-                return true;
+                return new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
             }
-            else if (HasTryParseMethod()) // Slow fallback for unknown types
+            else if (_hasTryParseMethod) // Slow fallback for unknown types
             {
-                parameterBinder = new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
-                return true;
+                return new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
             }
 
-            parameterBinder = default;
-            return false;
+            return new BodyParameterBinder<T>(parameterInfo.Name!, allowEmpty: false);
         }
 
         private static MethodInfo GetEnumTryParseMethod()
@@ -153,37 +198,32 @@ namespace Microsoft.AspNetCore.Http
         // TODO: Use InvariantCulture where possible? Or is CurrentCulture fine because it's more flexible?
         private static MethodInfo? FindTryParseMethod(Type type)
         {
-            static MethodInfo? Finder(Type type)
+            if (type.IsEnum)
             {
-                if (type.IsEnum)
-                {
-                    return EnumTryParseMethod.MakeGenericMethod(type);
-                }
-
-                var staticMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
-
-                foreach (var method in staticMethods)
-                {
-                    if (method.Name != "TryParse" || method.ReturnType != typeof(bool))
-                    {
-                        continue;
-                    }
-
-                    var tryParseParameters = method.GetParameters();
-
-                    if (tryParseParameters.Length == 2 &&
-                        tryParseParameters[0].ParameterType == typeof(string) &&
-                        tryParseParameters[1].IsOut &&
-                        tryParseParameters[1].ParameterType == type.MakeByRefType())
-                    {
-                        return method;
-                    }
-                }
-
-                return null;
+                return EnumTryParseMethod.MakeGenericMethod(type);
             }
 
-            return TryParseMethodCache.GetOrAdd(type, Finder);
+            var staticMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
+
+            foreach (var method in staticMethods)
+            {
+                if (method.Name != "TryParse" || method.ReturnType != typeof(bool))
+                {
+                    continue;
+                }
+
+                var tryParseParameters = method.GetParameters();
+
+                if (tryParseParameters.Length == 2 &&
+                    tryParseParameters[0].ParameterType == typeof(string) &&
+                    tryParseParameters[1].IsOut &&
+                    tryParseParameters[1].ParameterType == type.MakeByRefType())
+                {
+                    return method;
+                }
+            }
+
+            return null;
         }
 
         private static bool HasTryParseMethod()
@@ -439,7 +479,13 @@ namespace Microsoft.AspNetCore.Http
 
         public override bool TryBindValue(HttpContext httpContext, [MaybeNullWhen(false)] out T value)
         {
-            var rawValue = httpContext.Request.RouteValues[Name]?.ToString() ?? httpContext.Request.Query[Name].ToString();
+            return TryBindValue(httpContext, Name, out value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryBindValue(HttpContext httpContext, string name, [MaybeNullWhen(false)] out T value)
+        {
+            var rawValue = httpContext.Request.RouteValues[name]?.ToString() ?? httpContext.Request.Query[name].ToString();
 
             if (typeof(T) == typeof(string))
             {
@@ -1069,6 +1115,15 @@ namespace Microsoft.AspNetCore.Http
 #pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
             return true;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryBindValue(HttpContext httpContext, string name, [MaybeNullWhen(false)] out T value)
+        {
+#pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
+            value = httpContext.RequestServices.GetRequiredService<T>();
+#pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
+            return true;
+        }
     }
 
     sealed class HttpContextParameterBinder<T> : ParameterBinder<T>
@@ -1088,6 +1143,13 @@ namespace Microsoft.AspNetCore.Http
         }
 
         public override bool TryBindValue(HttpContext httpContext, [MaybeNullWhen(false)] out T value)
+        {
+            value = (T)(object)httpContext;
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryBindValue(HttpContext httpContext, string name, [MaybeNullWhen(false)] out T value)
         {
             value = (T)(object)httpContext;
             return true;
@@ -1115,6 +1177,13 @@ namespace Microsoft.AspNetCore.Http
             value = (T)(object)httpContext.RequestAborted;
             return true;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryBindValue(HttpContext httpContext, string name, [MaybeNullWhen(false)] out T value)
+        {
+            value = (T)(object)httpContext.RequestAborted;
+            return true;
+        }
     }
 
     sealed class BodyParameterBinder<T> : ParameterBinder<T>
@@ -1128,7 +1197,12 @@ namespace Microsoft.AspNetCore.Http
 
         public override string Name { get; }
 
-        public override async ValueTask<(T?, bool)> BindBodyOrValueAsync(HttpContext httpContext)
+        public override ValueTask<(T?, bool)> BindBodyOrValueAsync(HttpContext httpContext)
+        {
+            return BindBodyOrValueAsync(httpContext, default);
+        }
+
+        public static async ValueTask<(T?, bool)> BindBodyOrValueAsync(HttpContext httpContext, string? name)
         {
             try
             {

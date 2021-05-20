@@ -22,6 +22,125 @@ namespace Microsoft.AspNetCore.Http
 
     // These implementations would be code generated
 
+    // This is an optimized version of FuncDelegateClosure where we know the parameters don't have
+    // any custom attributes that change binding behavior
+    sealed class TypeOnlyFuncDelegateClosure<T0, R> : RequestDelegateClosure
+    {
+        public override bool HasBody => ParameterBinder<T0>.HasBodyBasedOnType;
+
+        private readonly string _name0;
+        private readonly ResultInvoker<R> _resultInvoker;
+        private readonly Func<T0, R> _delegate;
+
+        public TypeOnlyFuncDelegateClosure(Func<T0, R> @delegate, ParameterInfo[] parameters)
+        {
+            _delegate = @delegate;
+            _resultInvoker = ResultInvoker<R>.Create();
+            _name0 = parameters[0].Name!;
+        }
+
+        public override Task ProcessRequestAsync(HttpContext httpContext)
+        {
+            T0? arg0;
+
+            // This should inline nicely
+            if (!ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out arg0))
+            {
+                ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
+                httpContext.Response.StatusCode = 400;
+                return Task.CompletedTask;
+            }
+
+            R? result = _delegate(arg0!);
+
+            return _resultInvoker.Invoke(httpContext, result!);
+        }
+
+        public override async Task ProcessRequestWithBodyAsync(HttpContext httpContext)
+        {
+            (T0? arg0, bool success) = await ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
+
+            if (!success)
+            {
+                ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
+                httpContext.Response.StatusCode = 400;
+                return;
+            }
+
+            R? result = _delegate(arg0!);
+
+            await _resultInvoker.Invoke(httpContext, result!);
+        }
+    }
+
+    sealed class TypeOnlyFuncDelegateClosure<T0, T1, R> : RequestDelegateClosure
+    {
+        public override bool HasBody => ParameterBinder<T0>.HasBodyBasedOnType || ParameterBinder<T1>.HasBodyBasedOnType;
+
+        private readonly string _name0;
+        private readonly string _name1;
+        private readonly ResultInvoker<R> _resultInvoker;
+        private readonly Func<T0, T1, R> _delegate;
+
+        public TypeOnlyFuncDelegateClosure(Func<T0, T1, R> @delegate, ParameterInfo[] parameters)
+        {
+            _delegate = @delegate;
+            _resultInvoker = ResultInvoker<R>.Create();
+            _name0 = parameters[0].Name!;
+            _name1 = parameters[1].Name!;
+        }
+
+        public override Task ProcessRequestAsync(HttpContext httpContext)
+        {
+            T0? arg0;
+            T1? arg1;
+
+            // This should inline nicely
+            if (!ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out arg0))
+            {
+                ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
+                httpContext.Response.StatusCode = 400;
+                return Task.CompletedTask;
+            }
+
+            if (!ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out arg1))
+            {
+                ParameterLog.ParameterBindingFailed<T0>(httpContext, _name1);
+                httpContext.Response.StatusCode = 400;
+                return Task.CompletedTask;
+            }
+
+            R? result = _delegate(arg0!, arg1!);
+
+            return _resultInvoker.Invoke(httpContext, result!);
+        }
+
+        public override async Task ProcessRequestWithBodyAsync(HttpContext httpContext)
+        {
+            (T0? arg0, bool success) = await ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
+
+            if (!success)
+            {
+                ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
+                httpContext.Response.StatusCode = 400;
+                return;
+            }
+
+            (T1? arg1, success) = await ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
+
+            if (!success)
+            {
+                ParameterLog.ParameterBindingFailed<T0>(httpContext, _name1);
+                httpContext.Response.StatusCode = 400;
+                return;
+            }
+
+            R? result = _delegate(arg0!, arg1!);
+
+            await _resultInvoker.Invoke(httpContext, result!);
+        }
+    }
+
     sealed class ActionRequestDelegateClosure<T0> : RequestDelegateClosure
     {
         private readonly ParameterBinder<T0> _parameterBinder;
@@ -215,6 +334,11 @@ namespace Microsoft.AspNetCore.Http
         public static void ParameterBindingFailed<T>(HttpContext httpContext, ParameterBinder<T> binder)
         {
             _parameterBindingFailed(GetLogger(httpContext), typeof(T).Name, binder.Name, "", null);
+        }
+
+        public static void ParameterBindingFailed<T>(HttpContext httpContext, string name)
+        {
+            _parameterBindingFailed(GetLogger(httpContext), typeof(T).Name, name, "", null);
         }
 
         private static ILogger GetLogger(HttpContext httpContext)
