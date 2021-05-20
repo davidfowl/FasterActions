@@ -33,6 +33,10 @@ namespace Microsoft.AspNetCore.Http
             {
                 return ValueTaskInvoker<T>.Instance;
             }
+            if (typeof(T) == typeof(IResult))
+            {
+                return IResultInvoker<T>.Instance;
+            }
             else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Task<>))
             {
                 var resultType = typeof(T).GetGenericArguments()[0];
@@ -50,8 +54,8 @@ namespace Microsoft.AspNetCore.Http
                 else
                 {
                     // Task<T>
-                    // We need to use MakeGeneric method to get the correct version of the method to call
-                    // this is still a gap with safe native AOT support.
+                    // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
+                    // because it won't see the instantiation of the TaskOfTInvoker. 
 
                     var type = typeof(TaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
                     return (ResultInvoker<T>)Activator.CreateInstance(type)!;
@@ -74,8 +78,8 @@ namespace Microsoft.AspNetCore.Http
                 else
                 {
                     // ValueTask<T>
-                    // We need to use MakeGeneric method to get the correct version of the method to call
-                    // this is still a gap with safe native AOT support.
+                    // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
+                    // because it won't see the instantiation of the TaskOfTInvoker.
 
                     var type = typeof(ValueTaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
                     return (ResultInvoker<T>)Activator.CreateInstance(type)!;
