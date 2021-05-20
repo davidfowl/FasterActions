@@ -91,15 +91,15 @@ namespace Microsoft.AspNetCore.Http
         private static bool TryBindParameterBasedOnType(ParameterInfo parameterInfo, [MaybeNullWhen(false)] out ParameterBinder<T> parameterBinder)
         {
             if (typeof(T) == typeof(string) ||
-                     typeof(T) == typeof(byte) ||
-                     typeof(T) == typeof(short) ||
-                     typeof(T) == typeof(int) ||
-                     typeof(T) == typeof(long) ||
-                     typeof(T) == typeof(decimal) ||
-                     typeof(T) == typeof(Guid) ||
-                     typeof(T) == typeof(DateTime) ||
-                     typeof(T) == typeof(DateTimeOffset) ||
-                     HasTryParseMethod())
+                typeof(T) == typeof(byte) ||
+                typeof(T) == typeof(short) ||
+                typeof(T) == typeof(int) ||
+                typeof(T) == typeof(long) ||
+                typeof(T) == typeof(decimal) ||
+                typeof(T) == typeof(Guid) ||
+                typeof(T) == typeof(DateTime) ||
+                typeof(T) == typeof(DateTimeOffset) ||
+                HasTryParseMethod())
             {
                 parameterBinder = new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
                 return true;
