@@ -90,17 +90,7 @@ namespace Microsoft.AspNetCore.Http
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryBindParameterBasedOnType(ParameterInfo parameterInfo, [MaybeNullWhen(false)] out ParameterBinder<T> parameterBinder)
         {
-            if (typeof(T) == typeof(HttpContext))
-            {
-                parameterBinder = new HttpContextParameterBinder<T>(parameterInfo.Name!);
-                return true;
-            }
-            else if (typeof(T) == typeof(CancellationToken))
-            {
-                parameterBinder = new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
-                return true;
-            }
-            else if (typeof(T) == typeof(string) ||
+            if (typeof(T) == typeof(string) ||
                      typeof(T) == typeof(byte) ||
                      typeof(T) == typeof(short) ||
                      typeof(T) == typeof(int) ||
@@ -114,9 +104,19 @@ namespace Microsoft.AspNetCore.Http
                 parameterBinder = new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
                 return true;
             }
+            else if (typeof(T) == typeof(HttpContext))
+            {
+                parameterBinder = new HttpContextParameterBinder<T>(parameterInfo.Name!);
+                return true;
+            }
             else if (typeof(T).IsInterface)
             {
                 parameterBinder = new ServicesParameterBinder<T>(parameterInfo.Name!);
+                return true;
+            }
+            else if (typeof(T) == typeof(CancellationToken))
+            {
+                parameterBinder = new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
                 return true;
             }
 
