@@ -55,22 +55,17 @@ namespace Microsoft.AspNetCore.Http
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static ParameterBinder<T> BindParameterWithAttributes(ParameterInfo parameterInfo, Attribute[] parameterCustomAttributes)
         {
-            if (parameterInfo.Name is null)
-            {
-                throw new NotSupportedException("Parameter must have a name");
-            }
-
             if (parameterCustomAttributes.OfType<IFromRouteMetadata>().FirstOrDefault() is { } routeAttribute)
             {
-                return new RouteParameterBinder<T>(routeAttribute.Name ?? parameterInfo.Name);
+                return new RouteParameterBinder<T>(routeAttribute.Name ?? parameterInfo.Name!);
             }
             else if (parameterCustomAttributes.OfType<IFromQueryMetadata>().FirstOrDefault() is { } queryAttribute)
             {
-                return new QueryParameterBinder<T>(queryAttribute.Name ?? parameterInfo.Name);
+                return new QueryParameterBinder<T>(queryAttribute.Name ?? parameterInfo.Name!);
             }
             else if (parameterCustomAttributes.OfType<IFromHeaderMetadata>().FirstOrDefault() is { } headerAttribute)
             {
-                return new HeaderParameterBinder<T>(headerAttribute.Name ?? parameterInfo.Name);
+                return new HeaderParameterBinder<T>(headerAttribute.Name ?? parameterInfo.Name!);
             }
             else if (parameterCustomAttributes.OfType<IFromBodyMetadata>().FirstOrDefault() is { } bodyAttribute)
             {
@@ -78,14 +73,14 @@ namespace Microsoft.AspNetCore.Http
             }
             else if (parameterCustomAttributes.Any(a => a is IFromServiceMetadata))
             {
-                return new ServicesParameterBinder<T>(parameterInfo.Name);
+                return new ServicesParameterBinder<T>(parameterInfo.Name!);
             }
             else if (TryBindParameterBasedOnType(parameterInfo, out var parameterBinder))
             {
                 return parameterBinder;
             }
 
-            return new BodyParameterBinder<T>(parameterInfo.Name, allowEmpty: false);
+            return new BodyParameterBinder<T>(parameterInfo.Name!, allowEmpty: false);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
