@@ -33,8 +33,7 @@ namespace Microsoft.AspNetCore.Http
             {
                 return ValueTaskInvoker<T>.Instance;
             }
-            else if (typeof(T).IsGenericType &&
-                typeof(T).GetGenericTypeDefinition() == typeof(Task<>))
+            else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Task<>))
             {
                 var resultType = typeof(T).GetGenericArguments()[0];
 
@@ -58,8 +57,7 @@ namespace Microsoft.AspNetCore.Http
                     return (ResultInvoker<T>)Activator.CreateInstance(type)!;
                 }
             }
-            else if (typeof(T).IsGenericType &&
-                typeof(T).GetGenericTypeDefinition() == typeof(ValueTask<>))
+            else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(ValueTask<>))
             {
                 var resultType = typeof(T).GetGenericArguments()[0];
 
