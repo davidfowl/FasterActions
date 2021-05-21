@@ -164,7 +164,7 @@ namespace Microsoft.AspNetCore.Http
 
             Type type;
 
-            // ValueTask<T> where T : IResult
+            // Task<T> where T : IResult
             if (resultType.IsAssignableTo(typeof(IResult)))
             {
                 type = typeof(TaskOfTDerivedIResultInvoker<,>).MakeGenericType(typeof(TTask), resultType);
