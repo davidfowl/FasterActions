@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Http
         public abstract Task ProcessRequestWithBodyAsync(HttpContext httpContext);
     }
 
-    public static class ParameterLog
+    internal static class ParameterLog
     {
         private static readonly Action<ILogger, string, string, string, Exception?> _parameterBindingFailed = LoggerMessage.Define<string, string, string>(
             LogLevel.Debug,
