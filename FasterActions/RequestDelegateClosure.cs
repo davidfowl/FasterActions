@@ -105,7 +105,7 @@ namespace Microsoft.AspNetCore.Http
 
             if (!ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out arg1))
             {
-                ParameterLog.ParameterBindingFailed<T0>(httpContext, _name1);
+                ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
                 httpContext.Response.StatusCode = 400;
                 return Task.CompletedTask;
             }
