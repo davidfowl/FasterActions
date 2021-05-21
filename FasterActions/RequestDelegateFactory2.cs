@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Http
             var parameters = func.Method.GetParameters();
 
             RequestDelegateClosure closure = HasBindingAttributes(parameters) ?
-                new TypeOnlyFuncDelegateClosure<T0, R>(func, parameters) :
+                new TypeOnlyFuncRequestDelegateClosure<T0, R>(func, parameters) :
                 new FuncRequestDelegateClosure<T0, R>(func, parameters);
 
             return CreateRequestDelegateCore(closure);
@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.Http
             var parameters = func.Method.GetParameters();
 
             RequestDelegateClosure closure = HasBindingAttributes(parameters) ?
-                new TypeOnlyFuncDelegateClosure<T0, T1, R>(func, parameters) :
+                new TypeOnlyFuncRequestDelegateClosure<T0, T1, R>(func, parameters) :
                 new FuncRequestDelegateClosure<T0, T1, R>(func, parameters);
 
             return CreateRequestDelegateCore(closure);
@@ -90,7 +90,7 @@ namespace Microsoft.AspNetCore.Http
                 else if (parameterTypes.Length == 1)
                 {
                     var type = hasAttributes ? typeof(FuncRequestDelegateClosure<,>).MakeGenericType(methodInvokerTypes) :
-                                               typeof(TypeOnlyFuncDelegateClosure<,>).MakeGenericType(methodInvokerTypes);
+                                               typeof(TypeOnlyFuncRequestDelegateClosure<,>).MakeGenericType(methodInvokerTypes);
 
                     var @delegate = method.CreateDelegate(typeof(Func<,>).MakeGenericType(methodInvokerTypes));
 
