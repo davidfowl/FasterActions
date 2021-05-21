@@ -222,17 +222,15 @@ namespace Microsoft.AspNetCore.Http
 
         public override Task ProcessRequestAsync(HttpContext httpContext)
         {
-            T0? arg0;
-
             // Ideally this call would be inlined by the JIT but that would require dynamic PGO
-            if (!_parameterBinder.TryBindValue(httpContext, out arg0))
+            if (!_parameterBinder.TryBindValue(httpContext, out var arg0))
             {
                 ParameterLog.ParameterBindingFailed(httpContext, _parameterBinder);
                 httpContext.Response.StatusCode = 400;
                 return Task.CompletedTask;
             }
 
-            R? result = _delegate(arg0!);
+            R? result = _delegate(arg0);
 
             return _resultInvoker.Invoke(httpContext, result!);
         }

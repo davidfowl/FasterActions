@@ -41,154 +41,377 @@ namespace CodeGenerator
             WriteLine("");
             WriteLine("");
 
-            // TypeOnlyFuncDelegateClosure
-            for (int arity = 1; arity <= 16; arity++)
+            for (int arity = 0; arity <= 1; arity++)
             {
-                Write("sealed class TypeOnlyFuncDelegateClosure<");
-                for (int j = 0; j < arity; j++)
+                GenerateDelegateClosure(arity, hasReturnType: false);
+                GenerateDelegateClosure(arity, hasReturnType: true);
+                GenerateTypeOnlyDelegateClosure(arity, hasReturnType: false);
+                GenerateTypeOnlyDelegateClosure(arity, hasReturnType: true);
+            }
+
+            return _codeBuilder.ToString();
+        }
+
+        private void GenerateTypeOnlyDelegateClosure(int arity, bool hasReturnType = true)
+        {
+            var typeName = hasReturnType ? "TypeOnlyFuncDelegateClosure" : "TypeOnlyActionDelegateClosure";
+
+            Write($"sealed class {typeName}<");
+            for (int j = 0; j < arity; j++)
+            {
+                if (j > 0)
                 {
-                    if (j > 0)
-                    {
-                        Write(", ");
-                    }
-                    Write($"T{j}");
+                    Write(", ");
                 }
-                Write(", R");
-                Write("> : RequestDelegateClosure");
-                WriteLine();
-                WriteLine("{");
-                Indent();
-                Write("public override bool HasBody => ");
-                for (int j = 0; j < arity; j++)
+                Write($"T{j}");
+            }
+            if (hasReturnType)
+            {
+                if (arity == 0)
                 {
-                    if (j > 0)
-                    {
-                        Write(" || ");
-                    }
-                    Write($"ParameterBinder<T{j}>.HasBodyBasedOnType");
+                    Write("R");
                 }
-                Write(";");
-                WriteLine();
-                WriteLine();
-                for (int j = 0; j < arity; j++)
+                else
                 {
-                    WriteLine($"private readonly string _name{j};");
+                    Write(", R");
                 }
+            }
+            Write("> : RequestDelegateClosure");
+            WriteLine();
+            WriteLine("{");
+            Indent();
+            Write("public override bool HasBody => ");
+            for (int j = 0; j < arity; j++)
+            {
+                if (j > 0)
+                {
+                    Write(" || ");
+                }
+                Write($"ParameterBinder<T{j}>.HasBodyBasedOnType");
+            }
+            if (arity == 0)
+            {
+                Write("false");
+            }
+            Write(";");
+            WriteLine();
+            WriteLine();
+            for (int j = 0; j < arity; j++)
+            {
+                WriteLine($"private readonly string _name{j};");
+            }
+            if (hasReturnType)
+            {
                 WriteLine("private readonly ResultInvoker<R> _resultInvoker;");
-                Write("private readonly ");
-                Write("Func<");
-                for (int j = 0; j < arity; j++)
-                {
-                    if (j > 0)
-                    {
-                        Write(", ");
-                    }
-                    Write($"T{j}");
-                }
-                Write(", R>");
-                WriteLine(" _delegate;");
-                WriteLine();
-                Write("public TypeOnlyFuncDelegateClosure(");
-                Write("Func<");
-                for (int j = 0; j < arity; j++)
-                {
-                    if (j > 0)
-                    {
-                        Write(", ");
-                    }
-                    Write($"T{j}");
-                }
-                Write(", R>");
-                WriteLine(" @delegate, ParameterInfo[] parameters)");
-                WriteLine("{");
-                Indent();
-                WriteLine("_delegate = @delegate;");
+            }
+            Write("private readonly ");
+            WriteFuncOrActionType(arity, hasReturnType);
+
+            WriteLine(" _delegate;");
+            WriteLine();
+            Write($"public {typeName}(");
+            WriteFuncOrActionType(arity, hasReturnType);
+
+            WriteLine(" @delegate, ParameterInfo[] parameters)");
+            WriteLine("{");
+            Indent();
+            WriteLine("_delegate = @delegate;");
+            if (hasReturnType)
+            {
                 WriteLine("_resultInvoker = ResultInvoker<R>.Create();");
-                for (int j = 0; j < arity; j++)
-                {
-                    WriteLine($"_name{j} = parameters[{j}].Name!;");
-                }
-                Unindent();
-                WriteLine("}"); //ctor
+            }
+            for (int j = 0; j < arity; j++)
+            {
+                WriteLine($"_name{j} = parameters[{j}].Name!;");
+            }
+            Unindent();
+            WriteLine("}"); //ctor
 
-                WriteLine();
-                WriteLine("public override Task ProcessRequestAsync(HttpContext httpContext)");
+            WriteLine();
+            WriteLine("public override Task ProcessRequestAsync(HttpContext httpContext)");
+            WriteLine("{");
+            Indent();
+            for (int j = 0; j < arity; j++)
+            {
+                WriteLine($"if (!ParameterBinder<T{j}>.TryBindValueBasedOnType(httpContext, _name{j}, out var arg{j}))");
                 WriteLine("{");
                 Indent();
-                for (int j = 0; j < arity; j++)
-                {
-                    WriteLine($"if (!ParameterBinder<T{j}>.TryBindValueBasedOnType(httpContext, _name{j}, out var arg{j}))");
-                    WriteLine("{");
-                    Indent();
-                    WriteLine($"ParameterLog.ParameterBindingFailed<T{j}>(httpContext, _name{j});");
-                    WriteLine("httpContext.Response.StatusCode = 400;");
-                    WriteLine("return Task.CompletedTask;");
-                    Unindent();
-                    WriteLine("}");
-                    WriteLine();
-                }
-
-                Write("R? result = _delegate(");
-                for (int j = 0; j < arity; j++)
-                {
-                    if (j > 0)
-                    {
-                        Write(", ");
-                    }
-                    Write($"arg{j}");
-                }
-                WriteLine(");");
-
-                WriteLine();
-                WriteLine("return _resultInvoker.Invoke(httpContext, result);");
-
-                Unindent();
-                WriteLine("}"); // ProcessRequestAsync
-
-                WriteLine();
-                WriteLine("public override async Task ProcessRequestWithBodyAsync(HttpContext httpContext)");
-                WriteLine("{");
-                Indent();
-
-                WriteLine("var success = false;");
-                for (int j = 0; j < arity; j++)
-                {
-                    WriteLine($"(T{j}? arg{j}, success) = await ParameterBinder<T{j}>.BindBodyBasedOnType(httpContext, _name{j});");
-                    WriteLine();
-                    WriteLine("if (!success)");
-                    WriteLine("{");
-                    Indent();
-                    WriteLine($"ParameterLog.ParameterBindingFailed<T{j}>(httpContext, _name{j});");
-                    WriteLine("httpContext.Response.StatusCode = 400;");
-                    WriteLine("return;");
-                    Unindent();
-                    WriteLine("}");
-                    WriteLine();
-                }
-
-                Write("R? result = _delegate(");
-                for (int j = 0; j < arity; j++)
-                {
-                    if (j > 0)
-                    {
-                        Write(", ");
-                    }
-                    Write($"arg{j}!");
-                }
-                WriteLine(");");
-
-                WriteLine();
-                WriteLine("return _resultInvoker.Invoke(httpContext, result);");
-
-                Unindent();
-                WriteLine("}");
-
+                WriteLine($"ParameterLog.ParameterBindingFailed<T{j}>(httpContext, _name{j});");
+                WriteLine("httpContext.Response.StatusCode = 400;");
+                WriteLine("return Task.CompletedTask;");
                 Unindent();
                 WriteLine("}");
                 WriteLine();
             }
 
-            return _codeBuilder.ToString();
+            WriteDelegateCall(arity, hasReturnType);
+
+            WriteLine();
+
+            if (hasReturnType)
+            {
+                WriteLine("return _resultInvoker.Invoke(httpContext, result);");
+            }
+            else
+            {
+                WriteLine("return Task.CompletedTask;");
+            }
+
+            Unindent();
+            WriteLine("}"); // ProcessRequestAsync
+
+            WriteLine();
+            WriteLine("public override async Task ProcessRequestWithBodyAsync(HttpContext httpContext)");
+            WriteLine("{");
+            Indent();
+
+            if (arity > 0)
+            {
+                WriteLine("var success = false;");
+            }
+
+            for (int j = 0; j < arity; j++)
+            {
+                WriteLine($"(T{j}? arg{j}, success) = await ParameterBinder<T{j}>.BindBodyBasedOnType(httpContext, _name{j});");
+                WriteLine();
+                WriteLine("if (!success)");
+                WriteLine("{");
+                Indent();
+                WriteLine($"ParameterLog.ParameterBindingFailed<T{j}>(httpContext, _name{j});");
+                WriteLine("httpContext.Response.StatusCode = 400;");
+                WriteLine("return;");
+                Unindent();
+                WriteLine("}");
+                WriteLine();
+            }
+
+            WriteDelegateCall(arity, hasReturnType);
+
+            if (hasReturnType)
+            {
+                WriteLine();
+                WriteLine("await _resultInvoker.Invoke(httpContext, result);");
+            }
+
+            Unindent();
+            WriteLine("}");
+
+            Unindent();
+            WriteLine("}");
+            WriteLine();
+        }
+
+        private void WriteDelegateCall(int arity, bool hasReturnType)
+        {
+            if (hasReturnType)
+            {
+                Write("R? result = _delegate(");
+            }
+            else
+            {
+                Write("_delegate(");
+            }
+            for (int j = 0; j < arity; j++)
+            {
+                if (j > 0)
+                {
+                    Write(", ");
+                }
+                Write($"arg{j}!");
+            }
+            WriteLine(");");
+        }
+
+        private void WriteFuncOrActionType(int arity, bool hasReturnType)
+        {
+            if (hasReturnType)
+            {
+                Write("Func<");
+            }
+            else
+            {
+                Write("Action");
+                if (arity > 0)
+                {
+                    Write("<");
+                }
+            }
+            for (int j = 0; j < arity; j++)
+            {
+                if (j > 0)
+                {
+                    Write(", ");
+                }
+                Write($"T{j}");
+            }
+
+            if (hasReturnType)
+            {
+                if (arity == 0)
+                {
+                    Write("R>");
+                }
+                else
+                {
+                    Write(", R>");
+                }
+            }
+            else
+            {
+                if (arity > 0)
+                {
+                    Write(">");
+                }
+            }
+        }
+
+        private void GenerateDelegateClosure(int arity, bool hasReturnType = false)
+        {
+            var typeName = hasReturnType ? "FuncDelegateClosure" : "ActionDelegateClosure";
+
+            Write($"sealed class {typeName}<");
+            for (int j = 0; j < arity; j++)
+            {
+                if (j > 0)
+                {
+                    Write(", ");
+                }
+                Write($"T{j}");
+            }
+            if (hasReturnType)
+            {
+                if (arity == 0)
+                {
+                    Write("R");
+                }
+                else
+                {
+                    Write(", R");
+                }
+            }
+            Write("> : RequestDelegateClosure");
+            WriteLine();
+            WriteLine("{");
+            Indent();
+            Write("public override bool HasBody => ");
+            for (int j = 0; j < arity; j++)
+            {
+                if (j > 0)
+                {
+                    Write(" || ");
+                }
+                Write($"_parameterBinder{j}.IsBody");
+            }
+            if (arity == 0)
+            {
+                Write("false");
+            }
+            Write(";");
+            WriteLine();
+            WriteLine();
+            for (int j = 0; j < arity; j++)
+            {
+                WriteLine($"private readonly ParameterBinder<T{j}> _parameterBinder{j};");
+            }
+            if (hasReturnType)
+            {
+                WriteLine("private readonly ResultInvoker<R> _resultInvoker;");
+            }
+            Write("private readonly ");
+            WriteFuncOrActionType(arity, hasReturnType);
+            WriteLine(" _delegate;");
+            WriteLine();
+            Write("public TypeOnlyFuncDelegateClosure(");
+            WriteFuncOrActionType(arity, hasReturnType);
+            WriteLine(" @delegate, ParameterInfo[] parameters)");
+            WriteLine("{");
+            Indent();
+            WriteLine("_delegate = @delegate;");
+            
+            if (hasReturnType)
+            {
+                WriteLine("_resultInvoker = ResultInvoker<R>.Create();");
+            }
+            
+            for (int j = 0; j < arity; j++)
+            {
+                WriteLine($"_parameterBinder{j} = ParameterBinder<T{j}>.Create(parameters[{j}]);");
+            }
+            Unindent();
+            WriteLine("}"); //ctor
+
+            WriteLine();
+            WriteLine("public override Task ProcessRequestAsync(HttpContext httpContext)");
+            WriteLine("{");
+            Indent();
+            for (int j = 0; j < arity; j++)
+            {
+                WriteLine($"if (!_parameterBinder{j}.TryBindValue(httpContext, _name{j}, out var arg{j}))");
+                WriteLine("{");
+                Indent();
+                WriteLine($"ParameterLog.ParameterBindingFailed(httpContext, _parameterBinder{j});");
+                WriteLine("httpContext.Response.StatusCode = 400;");
+                WriteLine("return Task.CompletedTask;");
+                Unindent();
+                WriteLine("}");
+                WriteLine();
+            }
+
+            WriteDelegateCall(arity, hasReturnType);
+
+            WriteLine();
+
+            if (hasReturnType)
+            {
+                WriteLine("return _resultInvoker.Invoke(httpContext, result);");
+            }
+            else
+            {
+                WriteLine("return Task.CompletedTask;");
+            }
+
+            Unindent();
+            WriteLine("}"); // ProcessRequestAsync
+
+            WriteLine();
+            WriteLine("public override async Task ProcessRequestWithBodyAsync(HttpContext httpContext)");
+            WriteLine("{");
+            Indent();
+
+            if (arity > 0)
+            {
+                WriteLine("var success = false;");
+            }
+
+            for (int j = 0; j < arity; j++)
+            {
+                WriteLine($"(T{j}? arg{j}, success) = await _parameterBinder{j}.BindBodyOrValueAsync(httpContext);");
+                WriteLine();
+                WriteLine("if (!success)");
+                WriteLine("{");
+                Indent();
+                WriteLine($"ParameterLog.ParameterBindingFailed(httpContext, _parameterBinder{j});");
+                WriteLine("httpContext.Response.StatusCode = 400;");
+                WriteLine("return;");
+                Unindent();
+                WriteLine("}");
+                WriteLine();
+            }
+
+            WriteDelegateCall(arity, hasReturnType);
+
+            if (hasReturnType)
+            {
+                WriteLine();
+                WriteLine("await _resultInvoker.Invoke(httpContext, result);");
+            }
+
+            Unindent();
+            WriteLine("}");
+
+            Unindent();
+            WriteLine("}");
+            WriteLine();
         }
 
         private void WriteLine()
