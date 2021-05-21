@@ -41,17 +41,15 @@ namespace Microsoft.AspNetCore.Http
 
         public override Task ProcessRequestAsync(HttpContext httpContext)
         {
-            T0? arg0;
-
             // This should inline nicely
-            if (!ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out arg0))
+            if (!ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
             {
                 ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
                 httpContext.Response.StatusCode = 400;
                 return Task.CompletedTask;
             }
 
-            R? result = _delegate(arg0!);
+            R? result = _delegate(arg0);
 
             return _resultInvoker.Invoke(httpContext, result!);
         }
