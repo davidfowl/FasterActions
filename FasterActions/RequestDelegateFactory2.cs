@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http.Metadata;
 
 namespace Microsoft.AspNetCore.Http
 {
-    public static partial class ReflectionbasedRequestDelegateFactory
+    public static partial class RequestDelegateFactory2
     {
         public static RequestDelegate CreateRequestDelegate<T0>(Action<T0> func)
         {
