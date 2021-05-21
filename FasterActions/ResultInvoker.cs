@@ -57,11 +57,11 @@ namespace Microsoft.AspNetCore.Http
             {
                 if (typeof(T).GetGenericTypeDefinition() == typeof(Task<>))
                 {
-                    return (ResultInvoker<T>)TaskOfTInvokerCache<T>.Instance.Invoker;
+                    return TaskOfTInvokerCache<T>.Instance.Invoker;
                 }
                 else if (typeof(T).GetGenericTypeDefinition() == typeof(ValueTask<>))
                 {
-                    return (ResultInvoker<T>)ValueTaskOfTInvokerCache<T>.Instance.Invoker;
+                    return ValueTaskOfTInvokerCache<T>.Instance.Invoker;
                 }
             }
             else if (typeof(T).IsAssignableTo(typeof(IResult)))
@@ -174,11 +174,10 @@ namespace Microsoft.AspNetCore.Http
                 type = typeof(TaskOfTInvoker<,>).MakeGenericType(typeof(TTask), resultType);
             }
 
-
-            Invoker = Activator.CreateInstance(type)!;
+            Invoker = (ResultInvoker<TTask>)Activator.CreateInstance(type)!;
         }
 
-        public object Invoker { get; }
+        public ResultInvoker<TTask> Invoker { get; }
     }
 
     sealed class TaskOfTInvoker<T, TaskResult> : ResultInvoker<T>
@@ -249,11 +248,10 @@ namespace Microsoft.AspNetCore.Http
                 type = typeof(ValueTaskOfTInvoker<,>).MakeGenericType(typeof(TTask), resultType);
             }
 
-            
-            Invoker = Activator.CreateInstance(type)!;
+            Invoker = (ResultInvoker<TTask>)Activator.CreateInstance(type)!;
         }
 
-        public object Invoker { get; }
+        public ResultInvoker<TTask> Invoker { get; }
     }
 
     sealed class ValueTaskOfTInvoker<T, TaskResult> : ResultInvoker<T>
