@@ -53,49 +53,16 @@ namespace Microsoft.AspNetCore.Http
             {
                 return ValueTaskOfIResultInvoker<T>.Instance;
             }
-            else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Task<>))
+            else if (typeof(T).IsGenericType)
             {
-                var resultType = typeof(T).GetGenericArguments()[0];
-
-                // Task<T>
-                // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
-                // because it won't see the instantiation of the TaskOfTInvoker. 
-
-                Type type;
-
-                // Task<T> where T : IResult
-                if (resultType.IsAssignableTo(typeof(IResult)))
+                if (typeof(T).GetGenericTypeDefinition() == typeof(Task<>))
                 {
-                    type = typeof(TaskOfTDerivedIResultInvoker<,>).MakeGenericType(typeof(T), resultType);
+                    return (ResultInvoker<T>)TaskOfTInvokerCache<T>.Instance.Invoker;
                 }
-                else
+                else if (typeof(T).GetGenericTypeDefinition() == typeof(ValueTask<>))
                 {
-                    type = typeof(TaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
+                    return (ResultInvoker<T>)ValueTaskOfTInvokerCache<T>.Instance.Invoker;
                 }
-
-                return (ResultInvoker<T>)Activator.CreateInstance(type)!;
-            }
-            else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(ValueTask<>))
-            {
-                // ValueTask<T>
-                // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
-                // because it won't see the instantiation of the TaskOfTInvoker.
-
-                var resultType = typeof(T).GetGenericArguments()[0];
-
-                Type type;
-
-                // ValueTask<T> where T : IResult
-                if (resultType.IsAssignableTo(typeof(IResult)))
-                {
-                    type = typeof(ValueTaskOfDerivedIResultTInvoker<,>).MakeGenericType(typeof(T), resultType);
-                }
-                else
-                {
-                    type = typeof(ValueTaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
-                }
-
-                return (ResultInvoker<T>)Activator.CreateInstance(type)!;
             }
             else if (typeof(T).IsAssignableTo(typeof(IResult)))
             {
@@ -182,6 +149,38 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
+    // TTask = Task<T>
+    sealed class TaskOfTInvokerCache<TTask>
+    {
+        public static readonly ValueTaskOfTInvokerCache<TTask> Instance = new();
+
+        public TaskOfTInvokerCache()
+        {
+            // Task<T>
+            // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
+            // because it won't see the instantiation of the TaskOfTInvoker. 
+
+            var resultType = typeof(TTask).GetGenericArguments()[0];
+
+            Type type;
+
+            // ValueTask<T> where T : IResult
+            if (resultType.IsAssignableTo(typeof(IResult)))
+            {
+                type = typeof(TaskOfTDerivedIResultInvoker<,>).MakeGenericType(typeof(TTask), resultType);
+            }
+            else
+            {
+                type = typeof(TaskOfTInvoker<,>).MakeGenericType(typeof(TTask), resultType);
+            }
+
+
+            Invoker = Activator.CreateInstance(type)!;
+        }
+
+        public object Invoker { get; }
+    }
+
     sealed class TaskOfTInvoker<T, TaskResult> : ResultInvoker<T>
     {
         public static readonly TaskOfTInvoker<T, TaskResult> Instance = new();
@@ -226,6 +225,37 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
+    // TTask = ValueTask<T>
+    sealed class ValueTaskOfTInvokerCache<TTask>
+    {
+        public static readonly ValueTaskOfTInvokerCache<TTask> Instance = new();
+
+        public ValueTaskOfTInvokerCache()
+        {
+            // ValueTask<T>
+            // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
+            // because it won't see the instantiation of the TaskOfTInvoker.
+            var resultType = typeof(TTask).GetGenericArguments()[0];
+
+            Type type;
+
+            // ValueTask<T> where T : IResult
+            if (resultType.IsAssignableTo(typeof(IResult)))
+            {
+                type = typeof(ValueTaskOfTDerivedIResultInvoker<,>).MakeGenericType(typeof(TTask), resultType);
+            }
+            else
+            {
+                type = typeof(ValueTaskOfTInvoker<,>).MakeGenericType(typeof(TTask), resultType);
+            }
+
+            
+            Invoker = Activator.CreateInstance(type)!;
+        }
+
+        public object Invoker { get; }
+    }
+
     sealed class ValueTaskOfTInvoker<T, TaskResult> : ResultInvoker<T>
     {
         public static readonly ValueTaskOfTInvoker<T, TaskResult> Instance = new();
@@ -236,9 +266,9 @@ namespace Microsoft.AspNetCore.Http
         }
     }
 
-    sealed class ValueTaskOfDerivedIResultTInvoker<T, TaskResult> : ResultInvoker<T> where TaskResult : IResult
+    sealed class ValueTaskOfTDerivedIResultInvoker<T, TaskResult> : ResultInvoker<T> where TaskResult : IResult
     {
-        public static readonly ValueTaskOfDerivedIResultTInvoker<T, TaskResult> Instance = new();
+        public static readonly ValueTaskOfTDerivedIResultInvoker<T, TaskResult> Instance = new();
 
         public override async Task Invoke(HttpContext httpContext, T? result)
         {
