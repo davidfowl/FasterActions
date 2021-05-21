@@ -37,53 +37,65 @@ namespace Microsoft.AspNetCore.Http
             {
                 return IResultInvoker<T>.Instance;
             }
+            else if (typeof(T) == typeof(Task<string>))
+            {
+                return TaskOfStringInvoker<T>.Instance;
+            }
+            else if (typeof(T) == typeof(Task<IResult>))
+            {
+                return TaskOfIResultInvoker<T>.Instance;
+            }
+            else if (typeof(T) == typeof(ValueTask<string>))
+            {
+                return ValueTaskOfStringInvoker<T>.Instance;
+            }
+            else if (typeof(T) == typeof(ValueTask<IResult>))
+            {
+                return ValueTaskOfIResultInvoker<T>.Instance;
+            }
             else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Task<>))
             {
                 var resultType = typeof(T).GetGenericArguments()[0];
 
-                // Task<IResult> 
-                if (resultType == typeof(IResult))
+                // Task<T>
+                // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
+                // because it won't see the instantiation of the TaskOfTInvoker. 
+
+                Type type;
+
+                // Task<T> where T : IResult
+                if (resultType.IsAssignableTo(typeof(IResult)))
                 {
-                    return TaskOfIResultInvoker<T>.Instance;
-                }
-                // Task<string> 
-                else if (resultType == typeof(string))
-                {
-                    return TaskOfStringInvoker<T>.Instance;
+                    type = typeof(TaskOfTDerivedIResultInvoker<,>).MakeGenericType(typeof(T), resultType);
                 }
                 else
                 {
-                    // Task<T>
-                    // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
-                    // because it won't see the instantiation of the TaskOfTInvoker. 
-
-                    var type = typeof(TaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
-                    return (ResultInvoker<T>)Activator.CreateInstance(type)!;
+                    type = typeof(TaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
                 }
+
+                return (ResultInvoker<T>)Activator.CreateInstance(type)!;
             }
             else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(ValueTask<>))
             {
+                // ValueTask<T>
+                // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
+                // because it won't see the instantiation of the TaskOfTInvoker.
+
                 var resultType = typeof(T).GetGenericArguments()[0];
 
-                // ValueTask<IResult> 
-                if (resultType == typeof(IResult))
+                Type type;
+
+                // ValueTask<T> where T : IResult
+                if (resultType.IsAssignableTo(typeof(IResult)))
                 {
-                    return ValueTaskOfIResultInvoker<T>.Instance;
-                }
-                // ValueTask<string> 
-                else if (resultType == typeof(string))
-                {
-                    return ValueTaskOfStringInvoker<T>.Instance;
+                    type = typeof(ValueTaskOfDerivedIResultTInvoker<,>).MakeGenericType(typeof(T), resultType);
                 }
                 else
                 {
-                    // ValueTask<T>
-                    // We need to use MakeGenericType to resolve the T in Task<T>. This is still an issue for AOT support
-                    // because it won't see the instantiation of the TaskOfTInvoker.
-
-                    var type = typeof(ValueTaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
-                    return (ResultInvoker<T>)Activator.CreateInstance(type)!;
+                    type = typeof(ValueTaskOfTInvoker<,>).MakeGenericType(typeof(T), resultType);
                 }
+
+                return (ResultInvoker<T>)Activator.CreateInstance(type)!;
             }
             else if (typeof(T).IsAssignableTo(typeof(IResult)))
             {
@@ -172,11 +184,25 @@ namespace Microsoft.AspNetCore.Http
 
     sealed class TaskOfTInvoker<T, TaskResult> : ResultInvoker<T>
     {
+        public static readonly TaskOfTInvoker<T, TaskResult> Instance = new();
+
         public override async Task Invoke(HttpContext httpContext, T? result)
         {
             if (result == null) throw new ArgumentNullException(nameof(result));
 
             await httpContext.Response.WriteAsJsonAsync(await (Task<TaskResult>)(object)result);
+        }
+    }
+
+    sealed class TaskOfTDerivedIResultInvoker<T, TaskResult> : ResultInvoker<T> where TaskResult : IResult
+    {
+        public static readonly TaskOfTDerivedIResultInvoker<T, TaskResult> Instance = new();
+
+        public override async Task Invoke(HttpContext httpContext, T? result)
+        {
+            if (result == null) throw new ArgumentNullException(nameof(result));
+
+            await (await (Task<TaskResult>)(object)result).ExecuteAsync(httpContext);
         }
     }
 
@@ -202,9 +228,21 @@ namespace Microsoft.AspNetCore.Http
 
     sealed class ValueTaskOfTInvoker<T, TaskResult> : ResultInvoker<T>
     {
+        public static readonly ValueTaskOfTInvoker<T, TaskResult> Instance = new();
+
         public override async Task Invoke(HttpContext httpContext, T? result)
         {
             await httpContext.Response.WriteAsJsonAsync(await (ValueTask<TaskResult>)(object)result!);
+        }
+    }
+
+    sealed class ValueTaskOfDerivedIResultTInvoker<T, TaskResult> : ResultInvoker<T> where TaskResult : IResult
+    {
+        public static readonly ValueTaskOfDerivedIResultTInvoker<T, TaskResult> Instance = new();
+
+        public override async Task Invoke(HttpContext httpContext, T? result)
+        {
+            await (await (ValueTask<TaskResult>)(object)result!).ExecuteAsync(httpContext);
         }
     }
 
