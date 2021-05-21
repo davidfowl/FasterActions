@@ -321,7 +321,7 @@ namespace CodeGenerator
             WriteFuncOrActionType(arity, hasReturnType);
             WriteLine(" _delegate;");
             WriteLine();
-            Write("public TypeOnlyFuncDelegateClosure(");
+            Write($"public {typeName}(");
             WriteFuncOrActionType(arity, hasReturnType);
             WriteLine(" @delegate, ParameterInfo[] parameters)");
             WriteLine("{");
