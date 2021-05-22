@@ -65,10 +65,10 @@ namespace Microsoft.AspNetCore.Http
             }
             else if (typeof(T).IsAssignableTo(typeof(IResult)))
             {
-                return IResultInvoker<T>.Instance;
+                return new IResultInvoker<T>();
             }
 
-            return DefaultInvoker<T>.Instance;
+            return new DefaultInvoker<T>();
         }
     }
 
