@@ -92,10 +92,6 @@ namespace CodeGenerator
             {
                 WriteLine($"private readonly string _name{j};");
             }
-            if (hasReturnType)
-            {
-                WriteLine("private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;");
-            }
             Write("private readonly ");
             WriteFuncOrActionType(arity, hasReturnType);
 
@@ -108,10 +104,6 @@ namespace CodeGenerator
             WriteLine("{");
             Indent();
             WriteLine("_delegate = @delegate;");
-            if (hasReturnType)
-            {
-                WriteLine("_resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();");
-            }
             for (int j = 0; j < arity; j++)
             {
                 WriteLine($"_name{j} = parameters[{j}].Name!;");
@@ -142,7 +134,7 @@ namespace CodeGenerator
 
             if (hasReturnType)
             {
-                WriteLine("return _resultInvoker.Invoke(httpContext, result);");
+                WriteLine("return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);");
             }
             else
             {
@@ -182,7 +174,7 @@ namespace CodeGenerator
             if (hasReturnType)
             {
                 WriteLine();
-                WriteLine("await _resultInvoker.Invoke(httpContext, result);");
+                WriteLine("await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);");
             }
 
             Unindent();
@@ -223,10 +215,6 @@ namespace CodeGenerator
             {
                 WriteLine($"private readonly Microsoft.AspNetCore.Http.ParameterBinder<T{j}> _parameterBinder{j};");
             }
-            if (hasReturnType)
-            {
-                WriteLine("private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;");
-            }
             Write("private readonly ");
             WriteFuncOrActionType(arity, hasReturnType);
             WriteLine(" _delegate;");
@@ -237,11 +225,6 @@ namespace CodeGenerator
             WriteLine("{");
             Indent();
             WriteLine("_delegate = @delegate;");
-
-            if (hasReturnType)
-            {
-                WriteLine("_resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();");
-            }
 
             for (int j = 0; j < arity; j++)
             {
@@ -273,7 +256,7 @@ namespace CodeGenerator
 
             if (hasReturnType)
             {
-                WriteLine("return _resultInvoker.Invoke(httpContext, result);");
+                WriteLine("return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);");
             }
             else
             {
@@ -313,7 +296,7 @@ namespace CodeGenerator
             if (hasReturnType)
             {
                 WriteLine();
-                WriteLine("await _resultInvoker.Invoke(httpContext, result);");
+                WriteLine("await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);");
             }
 
             Unindent();

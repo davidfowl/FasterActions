@@ -40,27 +40,25 @@ namespace Microsoft.AspNetCore.Http
     {
         public override bool HasBody => false;
         
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
         {
             R? result = _delegate();
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
         {
             R? result = _delegate();
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -92,27 +90,25 @@ namespace Microsoft.AspNetCore.Http
     {
         public override bool HasBody => false;
         
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
         {
             R? result = _delegate();
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
         {
             R? result = _delegate();
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -164,13 +160,11 @@ namespace Microsoft.AspNetCore.Http
         public override bool HasBody => _parameterBinder0.IsBody;
         
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T0> _parameterBinder0;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
         }
         
@@ -185,7 +179,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -202,7 +196,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -254,13 +248,11 @@ namespace Microsoft.AspNetCore.Http
         public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType;
         
         private readonly string _name0;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
         }
         
@@ -275,7 +267,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -292,7 +284,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -363,13 +355,11 @@ namespace Microsoft.AspNetCore.Http
         
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T0> _parameterBinder0;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T1> _parameterBinder1;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
         }
@@ -392,7 +382,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -418,7 +408,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -489,13 +479,11 @@ namespace Microsoft.AspNetCore.Http
         
         private readonly string _name0;
         private readonly string _name1;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
         }
@@ -518,7 +506,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -544,7 +532,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -634,13 +622,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T0> _parameterBinder0;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T1> _parameterBinder1;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T2> _parameterBinder2;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -671,7 +657,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -706,7 +692,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -796,13 +782,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name0;
         private readonly string _name1;
         private readonly string _name2;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -833,7 +817,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -868,7 +852,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -977,13 +961,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T1> _parameterBinder1;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T2> _parameterBinder2;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T3> _parameterBinder3;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -1022,7 +1004,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -1066,7 +1048,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -1175,13 +1157,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name1;
         private readonly string _name2;
         private readonly string _name3;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -1220,7 +1200,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -1264,7 +1244,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -1392,13 +1372,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T2> _parameterBinder2;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T3> _parameterBinder3;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T4> _parameterBinder4;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -1445,7 +1423,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -1498,7 +1476,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -1626,13 +1604,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name2;
         private readonly string _name3;
         private readonly string _name4;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -1679,7 +1655,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -1732,7 +1708,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -1879,13 +1855,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T3> _parameterBinder3;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T4> _parameterBinder4;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T5> _parameterBinder5;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -1940,7 +1914,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -2002,7 +1976,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -2149,13 +2123,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name3;
         private readonly string _name4;
         private readonly string _name5;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -2210,7 +2182,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -2272,7 +2244,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -2438,13 +2410,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T4> _parameterBinder4;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T5> _parameterBinder5;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T6> _parameterBinder6;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -2507,7 +2477,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -2578,7 +2548,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -2744,13 +2714,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name4;
         private readonly string _name5;
         private readonly string _name6;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -2813,7 +2781,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -2884,7 +2852,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -3069,13 +3037,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T5> _parameterBinder5;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T6> _parameterBinder6;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T7> _parameterBinder7;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -3146,7 +3112,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -3226,7 +3192,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -3411,13 +3377,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name5;
         private readonly string _name6;
         private readonly string _name7;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -3488,7 +3452,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -3568,7 +3532,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -3772,13 +3736,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T6> _parameterBinder6;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T7> _parameterBinder7;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T8> _parameterBinder8;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -3857,7 +3819,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -3946,7 +3908,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -4150,13 +4112,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name6;
         private readonly string _name7;
         private readonly string _name8;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -4235,7 +4195,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -4324,7 +4284,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -4547,13 +4507,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T7> _parameterBinder7;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T8> _parameterBinder8;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T9> _parameterBinder9;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -4640,7 +4598,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -4738,7 +4696,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -4961,13 +4919,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name7;
         private readonly string _name8;
         private readonly string _name9;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -5054,7 +5010,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -5152,7 +5108,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -5394,13 +5350,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T8> _parameterBinder8;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T9> _parameterBinder9;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T10> _parameterBinder10;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -5495,7 +5449,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -5602,7 +5556,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -5844,13 +5798,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name8;
         private readonly string _name9;
         private readonly string _name10;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -5945,7 +5897,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -6052,7 +6004,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -6313,13 +6265,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T9> _parameterBinder9;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T10> _parameterBinder10;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T11> _parameterBinder11;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -6422,7 +6372,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -6538,7 +6488,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -6799,13 +6749,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name9;
         private readonly string _name10;
         private readonly string _name11;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -6908,7 +6856,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -7024,7 +6972,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -7304,13 +7252,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T10> _parameterBinder10;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T11> _parameterBinder11;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T12> _parameterBinder12;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -7421,7 +7367,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -7546,7 +7492,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -7826,13 +7772,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name10;
         private readonly string _name11;
         private readonly string _name12;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -7943,7 +7887,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -8068,7 +8012,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -8367,13 +8311,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T11> _parameterBinder11;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T12> _parameterBinder12;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T13> _parameterBinder13;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -8492,7 +8434,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -8626,7 +8568,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -8925,13 +8867,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name11;
         private readonly string _name12;
         private readonly string _name13;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -9050,7 +8990,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -9184,7 +9124,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -9502,13 +9442,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T12> _parameterBinder12;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T13> _parameterBinder13;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T14> _parameterBinder14;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -9635,7 +9573,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -9778,7 +9716,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -10096,13 +10034,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name12;
         private readonly string _name13;
         private readonly string _name14;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -10229,7 +10165,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -10372,7 +10308,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -10709,13 +10645,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T13> _parameterBinder13;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T14> _parameterBinder14;
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T15> _parameterBinder15;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R?> _delegate;
         
         public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
             _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
             _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
@@ -10850,7 +10784,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!, arg15!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -11002,7 +10936,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!, arg15!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
@@ -11339,13 +11273,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly string _name13;
         private readonly string _name14;
         private readonly string _name15;
-        private readonly Microsoft.AspNetCore.Http.ResultInvoker<R> _resultInvoker;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R?> _delegate;
         
         public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
         {
             _delegate = @delegate;
-            _resultInvoker = Microsoft.AspNetCore.Http.ResultInvoker<R>.Create();
             _name0 = parameters[0].Name!;
             _name1 = parameters[1].Name!;
             _name2 = parameters[2].Name!;
@@ -11480,7 +11412,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!, arg15!);
             
-            return _resultInvoker.Invoke(httpContext, result);
+            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
         
         public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -11632,7 +11564,7 @@ namespace Microsoft.AspNetCore.Http
             
             R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!, arg15!);
             
-            await _resultInvoker.Invoke(httpContext, result);
+            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
         }
     }
     
