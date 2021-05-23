@@ -3,11 +3,22 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 // Boot the web application
 var app = WebApplication.Create(args);
 
+var options = new DbContextOptionsBuilder().UseSqlite("Data Source=Todos.db").Options;
+
+// This makes sure the database and tables are created
+using (var db = new TodoDbContext(options))
+{
+    db.Database.EnsureCreated();
+}
+
+// Register the routes
+TodoApi.MapRoutes(app, options);
 
 // Create a RequestDelegate, the ASP.NET primitive for handling requests from the
 // specified delegate
@@ -19,11 +30,13 @@ app.MapGet("/", rd);
 // Run the application
 app.Run();
 
+
 class Foo
 {
-    public static async ValueTask<Product> Hello(int id, [FromRoute]string p, PageInfo pi) => new() { Message = $"Hello {id}" };
+    public static async ValueTask<Data> Hello(string name) => new() { Message = $"Hello {name}" };
 }
-class Product
+
+class Data
 {
     public string Message { get; init; } = default!;
 }

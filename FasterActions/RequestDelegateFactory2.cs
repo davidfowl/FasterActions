@@ -14,6 +14,11 @@ namespace Microsoft.AspNetCore.Http
             return CreateRequestDelegateCore(new ActionRequestDelegateClosure<T0>(func, func.Method.GetParameters()));
         }
 
+        public static RequestDelegate CreateRequestDelegate<R>(Func<R> func)
+        {
+            return CreateRequestDelegateCore(new FuncRequestDelegateClosure<R>(func, func.Method.GetParameters()));
+        }
+
         public static RequestDelegate CreateRequestDelegate<T0, R>(Func<T0, R> func)
         {
             var parameters = func.Method.GetParameters();
