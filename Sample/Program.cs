@@ -33,7 +33,7 @@ app.Run();
 
 class Foo
 {
-    public static async ValueTask<Data> Hello(string name, Options options) => new() { Message = $"Hello {name}" };
+    public static async ValueTask<Data> Hello(string name, Options options, PageInfo pi) => new() { Message = $"Hello {name}" };
 }
 
 class Data

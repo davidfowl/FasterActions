@@ -202,36 +202,11 @@ namespace Microsoft.AspNetCore.Http
             return _tryParse(s, out value);
         }
 
-        // TODO: Use InvariantCulture where possible? Or is CurrentCulture fine because it's more flexible?
-        private static MethodInfo? FindTryParseMethod(Type type)
-        {
-            var staticMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
-
-            foreach (var method in staticMethods)
-            {
-                if (method.Name != "TryParse" || method.ReturnType != typeof(bool))
-                {
-                    continue;
-                }
-
-                var tryParseParameters = method.GetParameters();
-
-                if (tryParseParameters.Length == 2 &&
-                    tryParseParameters[0].ParameterType == typeof(string) &&
-                    tryParseParameters[1].IsOut &&
-                    tryParseParameters[1].ParameterType == type.MakeByRefType())
-                {
-                    return method;
-                }
-            }
-
-            return null;
-        }
-
         private static TryParse? FindTryParseMethod()
         {
-            var nonNullableParameterType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
-            var methodInfo = FindTryParseMethod(nonNullableParameterType);
+            var type = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+
+            var methodInfo = type.GetMethod("TryParse", BindingFlags.Public | BindingFlags.Static, new[] { typeof(string), type.MakeByRefType() });
 
             if (methodInfo != null)
             {
