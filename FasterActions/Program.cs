@@ -21,9 +21,24 @@ app.Run();
 
 class Foo
 {
-    public static async ValueTask<Product> Hello(int id, [FromRoute]string p, ILoggerFactory lf) => new() { Message = $"Hello {id}" };
+    public static async ValueTask<Product> Hello(int id, [FromRoute]string p, PageInfo pi) => new() { Message = $"Hello {id}" };
 }
 class Product
 {
     public string Message { get; init; } = default!;
+}
+
+record PageInfo(int PageIndex)
+{
+    public static bool TryParse(string s, out PageInfo? page)
+    {
+        if (int.TryParse(s, out var value))
+        {
+            page = new PageInfo(value);
+            return true;
+        }
+
+        page = default;
+        return false;
+    }
 }

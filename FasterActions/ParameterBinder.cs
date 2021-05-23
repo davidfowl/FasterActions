@@ -21,6 +21,9 @@ namespace Microsoft.AspNetCore.Http
     /// </summary>
     public abstract class ParameterBinder<T>
     {
+        // Try parse methdods that may be defined on T
+        private delegate bool TryParse(string s, out T value);
+
         public abstract bool IsBody { get; }
         public abstract string Name { get; }
 
@@ -28,7 +31,7 @@ namespace Microsoft.AspNetCore.Http
         public abstract ValueTask<(T?, bool)> BindBodyOrValueAsync(HttpContext httpContext);
 
         private static readonly MethodInfo EnumTryParseMethod = GetEnumTryParseMethod();
-        private static readonly bool _hasTryParseMethod = HasTryParseMethod();
+        private static readonly TryParse? _tryParse = FindTryParseMethod();
 
         public static bool HasBodyBasedOnType =>
                 typeof(T) != typeof(string) &&
@@ -45,7 +48,7 @@ namespace Microsoft.AspNetCore.Http
                 typeof(T) != typeof(HttpContext) &&
                 typeof(T) != typeof(CancellationToken) &&
                 !typeof(T).IsInterface &&
-                !_hasTryParseMethod;
+                _tryParse == null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryBindValueBasedOnType(HttpContext httpContext, string name, [MaybeNullWhen(false)] out T value)
@@ -76,7 +79,7 @@ namespace Microsoft.AspNetCore.Http
             {
                 return CancellationTokenParameterBinder<T>.TryBindValue(httpContext, name, out value);
             }
-            else if (_hasTryParseMethod) // Slow fallback for unknown types
+            else if (_tryParse != null) // Slow fallback for unknown types
             {
                 return RouteOrQueryParameterBinder<T>.TryBindValue(httpContext, name, out value);
             }
@@ -163,12 +166,24 @@ namespace Microsoft.AspNetCore.Http
             {
                 return new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
             }
-            else if (_hasTryParseMethod) // Slow fallback for unknown types
+            else if (_tryParse != null) // Slow fallback for unknown types
             {
                 return new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
             }
 
             return new BodyParameterBinder<T>(parameterInfo.Name!, allowEmpty: false);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryParseValue(string s, [MaybeNullWhen(false)] out T value)
+        {
+            if (_tryParse == null)
+            {
+                value = default;
+                return false;
+            }
+
+            return _tryParse(s, out value);
         }
 
         private static MethodInfo GetEnumTryParseMethod()
@@ -226,15 +241,19 @@ namespace Microsoft.AspNetCore.Http
             return null;
         }
 
-        private static bool HasTryParseMethod()
+        private static TryParse? FindTryParseMethod()
         {
             var nonNullableParameterType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
-            return FindTryParseMethod(nonNullableParameterType) is not null;
+            var methodInfo = FindTryParseMethod(nonNullableParameterType);
+
+            if (methodInfo != null)
+            {
+                return methodInfo.CreateDelegate<TryParse>();
+            }
+
+            return null;
         }
     }
-
-    // REVIEW: These are still boxing by using Convert.ChangeType, but we could code generate implementations
-    // for each combination of source and known type that supports TryParse
 
     sealed class RouteParameterBinder<T> : ParameterBinder<T>
     {
@@ -454,8 +473,7 @@ namespace Microsoft.AspNetCore.Http
                 return false;
             }
 
-            value = (T?)Convert.ChangeType(rawValue, typeof(T));
-            return value != null;
+            return TryParseValue(rawValue, out value);
         }
     }
 
@@ -683,8 +701,7 @@ namespace Microsoft.AspNetCore.Http
                 return false;
             }
 
-            value = (T)Convert.ChangeType(rawValue, typeof(T));
-            return true;
+            return TryParseValue(rawValue, out value);
         }
     }
 
@@ -906,8 +923,7 @@ namespace Microsoft.AspNetCore.Http
                 return false;
             }
 
-            value = (T)Convert.ChangeType(rawValue, typeof(T));
-            return true;
+            return TryParseValue(rawValue, out value);
         }
     }
 
@@ -1085,8 +1101,7 @@ namespace Microsoft.AspNetCore.Http
                 return false;
             }
 
-            value = (T)Convert.ChangeType(rawValue, typeof(T));
-            return true;
+            return TryParseValue(rawValue, out value);
         }
     }
 
