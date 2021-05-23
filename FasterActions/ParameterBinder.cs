@@ -71,13 +71,13 @@ namespace Microsoft.AspNetCore.Http
             {
                 return HttpContextParameterBinder<T>.TryBindValue(httpContext, name, out value);
             }
-            else if (typeof(T).IsInterface)
-            {
-                return ServicesParameterBinder<T>.TryBindValue(httpContext, name, out value);
-            }
             else if (typeof(T) == typeof(CancellationToken))
             {
                 return CancellationTokenParameterBinder<T>.TryBindValue(httpContext, name, out value);
+            }
+            else if (typeof(T).IsInterface)
+            {
+                return ServicesParameterBinder<T>.TryBindValue(httpContext, name, out value);
             }
             else if (typeof(T).IsEnum || _tryParse != null) // Slow fallback for unknown types
             {
@@ -158,13 +158,13 @@ namespace Microsoft.AspNetCore.Http
             {
                 return new HttpContextParameterBinder<T>(parameterInfo.Name!);
             }
-            else if (typeof(T).IsInterface)
-            {
-                return new ServicesParameterBinder<T>(parameterInfo.Name!);
-            }
             else if (typeof(T) == typeof(CancellationToken))
             {
                 return new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
+            }
+            else if (typeof(T).IsInterface)
+            {
+                return new ServicesParameterBinder<T>(parameterInfo.Name!);
             }
             else if (typeof(T).IsEnum || _tryParse != null) // Slow fallback for unknown types
             {
