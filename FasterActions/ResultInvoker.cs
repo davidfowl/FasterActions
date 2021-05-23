@@ -84,7 +84,9 @@ namespace Microsoft.AspNetCore.Http
     {
         public override Task Invoke(HttpContext httpContext, T? result)
         {
-            return ((IResult)(object)result!).ExecuteAsync(httpContext);
+            if (result == null) throw new ArgumentNullException(nameof(result));
+
+            return ((IResult)(object)result).ExecuteAsync(httpContext);
         }
     }
 

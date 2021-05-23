@@ -96,6 +96,24 @@ namespace Microsoft.AspNetCore.Http
 
                     closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters)!;
                 }
+                else if (parameterTypes.Length == 2)
+                {
+                    var type = hasAttributes ? typeof(FuncRequestDelegateClosure<,,>).MakeGenericType(methodInvokerTypes) :
+                                               typeof(TypeOnlyFuncRequestDelegateClosure<,,>).MakeGenericType(methodInvokerTypes);
+
+                    var @delegate = method.CreateDelegate(typeof(Func<,,>).MakeGenericType(methodInvokerTypes));
+
+                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters)!;
+                }
+                else if (parameterTypes.Length == 3)
+                {
+                    var type = hasAttributes ? typeof(FuncRequestDelegateClosure<,,,>).MakeGenericType(methodInvokerTypes) :
+                                               typeof(TypeOnlyFuncRequestDelegateClosure<,,,>).MakeGenericType(methodInvokerTypes);
+
+                    var @delegate = method.CreateDelegate(typeof(Func<,,,>).MakeGenericType(methodInvokerTypes));
+
+                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters)!;
+                }
             }
             else
             {

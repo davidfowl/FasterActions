@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 // Boot the web application
 var app = WebApplication.Create(args);
@@ -19,7 +21,7 @@ app.Run();
 
 class Foo
 {
-    public static async ValueTask<Product> Hello(int id) => new() { Message = $"Hello {id}" };
+    public static async ValueTask<Product> Hello(int id, [FromRoute]string p, ILoggerFactory lf) => new() { Message = $"Hello {id}" };
 }
 class Product
 {

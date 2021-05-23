@@ -256,12 +256,12 @@ namespace Microsoft.AspNetCore.Http
 
         public override bool TryBindValue(HttpContext httpContext, [MaybeNullWhen(false)] out T value)
         {
-            var rawValue = httpContext.Request.RouteValues[Name]?.ToString();
+            var rawValue = httpContext.Request.RouteValues[Name]?.ToString() ?? "";
 
             if (typeof(T) == typeof(string))
             {
-                value = (T?)(object?)rawValue;
-                return value != null;
+                value = (T)(object)rawValue;
+                return true;
             }
 
             if (typeof(T) == typeof(byte))
