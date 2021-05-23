@@ -139,7 +139,7 @@ namespace Microsoft.AspNetCore.Http
     // TTask = Task<T>
     sealed class TaskOfTInvokerCache<TTask>
     {
-        public static readonly ValueTaskOfTInvokerCache<TTask> Instance = new();
+        public static readonly TaskOfTInvokerCache<TTask> Instance = new();
 
         public TaskOfTInvokerCache()
         {
