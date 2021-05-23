@@ -30,7 +30,6 @@ namespace Microsoft.AspNetCore.Http
         public abstract bool TryBindValue(HttpContext httpContext, [MaybeNullWhen(false)] out T value);
         public abstract ValueTask<(T?, bool)> BindBodyOrValueAsync(HttpContext httpContext);
 
-        private static readonly MethodInfo EnumTryParseMethod = GetEnumTryParseMethod();
         private static readonly TryParse? _tryParse = FindTryParseMethod();
 
         public static bool HasBodyBasedOnType =>
@@ -48,6 +47,7 @@ namespace Microsoft.AspNetCore.Http
                 typeof(T) != typeof(HttpContext) &&
                 typeof(T) != typeof(CancellationToken) &&
                 !typeof(T).IsInterface &&
+                !typeof(T).IsEnum &&
                 _tryParse == null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,7 +79,7 @@ namespace Microsoft.AspNetCore.Http
             {
                 return CancellationTokenParameterBinder<T>.TryBindValue(httpContext, name, out value);
             }
-            else if (_tryParse != null) // Slow fallback for unknown types
+            else if (typeof(T).IsEnum || _tryParse != null) // Slow fallback for unknown types
             {
                 return RouteOrQueryParameterBinder<T>.TryBindValue(httpContext, name, out value);
             }
@@ -166,7 +166,7 @@ namespace Microsoft.AspNetCore.Http
             {
                 return new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
             }
-            else if (_tryParse != null) // Slow fallback for unknown types
+            else if (typeof(T).IsEnum || _tryParse != null) // Slow fallback for unknown types
             {
                 return new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
             }
@@ -177,6 +177,22 @@ namespace Microsoft.AspNetCore.Http
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryParseValue(string s, [MaybeNullWhen(false)] out T value)
         {
+            if (typeof(T).IsEnum)
+            {
+                // This fails because we don't have the the right generic constraints for T
+                // return Enum.TryParse<T>(s, out value);
+
+                // This unforunately does boxing :(
+                if (Enum.TryParse(typeof(T), s, out var result))
+                {
+                    value = (T?)result;
+                    return value != null;
+                }
+
+                value = default;
+                return false;
+            }
+
             if (_tryParse == null)
             {
                 value = default;
@@ -186,38 +202,9 @@ namespace Microsoft.AspNetCore.Http
             return _tryParse(s, out value);
         }
 
-        private static MethodInfo GetEnumTryParseMethod()
-        {
-            var staticEnumMethods = typeof(Enum).GetMethods(BindingFlags.Public | BindingFlags.Static);
-
-            foreach (var method in staticEnumMethods)
-            {
-                if (!method.IsGenericMethod || method.Name != "TryParse" || method.ReturnType != typeof(bool))
-                {
-                    continue;
-                }
-
-                var tryParseParameters = method.GetParameters();
-
-                if (tryParseParameters.Length == 2 &&
-                    tryParseParameters[0].ParameterType == typeof(string) &&
-                    tryParseParameters[1].IsOut)
-                {
-                    return method;
-                }
-            }
-
-            throw new Exception("static bool System.Enum.TryParse<TEnum>(string? value, out TEnum result) does not exist!!?!?");
-        }
-
         // TODO: Use InvariantCulture where possible? Or is CurrentCulture fine because it's more flexible?
         private static MethodInfo? FindTryParseMethod(Type type)
         {
-            if (type.IsEnum)
-            {
-                return EnumTryParseMethod.MakeGenericMethod(type);
-            }
-
             var staticMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
 
             foreach (var method in staticMethods)

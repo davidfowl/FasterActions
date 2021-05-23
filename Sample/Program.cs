@@ -33,12 +33,18 @@ app.Run();
 
 class Foo
 {
-    public static async ValueTask<Data> Hello(string name) => new() { Message = $"Hello {name}" };
+    public static async ValueTask<Data> Hello(string name, Options options) => new() { Message = $"Hello {name}" };
 }
 
 class Data
 {
     public string Message { get; init; } = default!;
+}
+
+enum Options
+{
+    One,
+    Two
 }
 
 record PageInfo(int PageIndex)
