@@ -43,7 +43,7 @@ class Data
 
 record PageInfo(int PageIndex)
 {
-    public static bool TryParse(string s, out PageInfo? page)
+    public static bool TryParse(string s, out PageInfo page)
     {
         if (int.TryParse(s, out var value))
         {
