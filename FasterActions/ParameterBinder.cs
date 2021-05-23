@@ -621,9 +621,12 @@ namespace Microsoft.AspNetCore.Http
 
     sealed class BodyParameterBinder<T> : ParameterBinder<T>
     {
+        private readonly bool _allowEmpty;
+
         public BodyParameterBinder(string name, bool allowEmpty)
         {
             Name = name;
+            _allowEmpty = allowEmpty;
         }
 
         public override bool IsBody => true;
@@ -632,6 +635,11 @@ namespace Microsoft.AspNetCore.Http
 
         public override ValueTask<(T?, bool)> BindBodyOrValueAsync(HttpContext httpContext)
         {
+            if (_allowEmpty && httpContext.Request.ContentLength == 0)
+            {
+                return new((default, true));
+            }
+
             return BindBodyOrValueAsync(httpContext, default);
         }
 
