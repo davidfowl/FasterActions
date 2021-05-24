@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using static Results;
 using Microsoft.AspNetCore.Http;
+using static Results;
 
 class TodoApi
 {
@@ -18,13 +18,16 @@ class TodoApi
         {
             using var db = new TodoDbContext(options);
             return await db.Todos.FindAsync(id) is Todo todo ? Ok(todo) : NotFound();
-        }));
+        }))
+        .WithMetadata(new EndpointNameMetadata("todos"));
 
         routes.MapPost("/todos", RequestDelegateFactory2.CreateRequestDelegate(async (Todo todo) =>
         {
             using var db = new TodoDbContext(options);
             await db.Todos.AddAsync(todo);
             await db.SaveChangesAsync();
+
+            return CreatedAt(todo, "todos", new { id = todo.Id });
         }));
 
         routes.MapDelete("/todos/{id}", RequestDelegateFactory2.CreateRequestDelegate(async (int id) =>
