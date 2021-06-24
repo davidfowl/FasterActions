@@ -188,7 +188,7 @@ namespace CodeGenerator
             var typeName = hasReturnType ? "FuncRequestDelegateClosure" : "ActionRequestDelegateClosure";
 
             Write($"sealed class {typeName}");
-            WriteGenericParameters(arity, hasReturnType);
+            WriteGenericParameters(arity, hasReturnType, writeDam: true);
             Write(" : Microsoft.AspNetCore.Http.RequestDelegateClosure");
             WriteLine();
             WriteLine("{");
@@ -305,7 +305,7 @@ namespace CodeGenerator
             WriteLine();
         }
 
-        private void WriteGenericParameters(int arity, bool hasReturnType)
+        private void WriteGenericParameters(int arity, bool hasReturnType, bool writeDam = false)
         {
             if (arity > 0 || hasReturnType)
             {
@@ -318,17 +318,30 @@ namespace CodeGenerator
                 {
                     Write(", ");
                 }
+                if (writeDam)
+                {
+                    Write("[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]");
+                }
                 Write($"T{j}");
             }
             if (hasReturnType)
             {
                 if (arity == 0)
                 {
+                    if (writeDam)
+                    {
+                        Write("[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]");
+                    }
                     Write("R>");
                 }
                 else
                 {
-                    Write(", R>");
+                    Write(", ");
+                    if (writeDam)
+                    {
+                        Write("[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]");
+                    }
+                    Write("R>");
                 }
             }
             else

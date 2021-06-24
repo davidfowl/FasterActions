@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Http
@@ -8,7 +9,7 @@ namespace Microsoft.AspNetCore.Http
     /// <summary>
     /// <see cref="ResultInvoker"/> a wrapper around a function pointer that processes the result.
     /// </summary>
-    public abstract class ResultInvoker<T>
+    public abstract class ResultInvoker<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]T>
     {
         public static readonly ResultInvoker<T> Instance = Create();
 

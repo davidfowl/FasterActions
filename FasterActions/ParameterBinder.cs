@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Http
     /// 2. Ones that are asynchronous and potentially IO bound. An example is reading a JSON body
     /// from an http request (or reading a file). (invoked via BindBodyAsync)
     /// </summary>
-    public abstract class ParameterBinder<T>
+    public abstract class ParameterBinder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]T>
     {
         // Try parse methdods that may be defined on T
         private delegate bool TryParse(string s, out T value);

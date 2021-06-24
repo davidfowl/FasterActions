@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => false;
         
@@ -62,7 +62,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody;
         
@@ -105,7 +105,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody;
         
@@ -150,7 +150,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody;
         
@@ -211,7 +211,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody;
         
@@ -274,7 +274,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody;
         
@@ -353,7 +353,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody;
         
@@ -434,7 +434,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody;
         
@@ -531,7 +531,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody;
         
@@ -630,7 +630,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody;
         
@@ -745,7 +745,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody;
         
@@ -862,7 +862,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody;
         
@@ -995,7 +995,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody;
         
@@ -1130,7 +1130,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody;
         
@@ -1281,7 +1281,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody;
         
@@ -1434,7 +1434,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody;
         
@@ -1603,7 +1603,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody;
         
@@ -1774,7 +1774,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody;
         
@@ -1961,7 +1961,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody;
         
@@ -2150,7 +2150,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody;
         
@@ -2355,7 +2355,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody;
         
@@ -2562,7 +2562,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody;
         
@@ -2785,7 +2785,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody;
         
@@ -3010,7 +3010,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody;
         
@@ -3251,7 +3251,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody;
         
@@ -3494,7 +3494,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T12> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody;
         
@@ -3753,7 +3753,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T12, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody;
         
@@ -4014,7 +4014,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T12, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T13> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody || _parameterBinder13.IsBody;
         
@@ -4291,7 +4291,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T12, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T13, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody || _parameterBinder13.IsBody;
         
@@ -4570,7 +4570,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T12, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T13, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T14> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody || _parameterBinder13.IsBody || _parameterBinder14.IsBody;
         
@@ -4865,7 +4865,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T12, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T13, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T14, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody || _parameterBinder13.IsBody || _parameterBinder14.IsBody;
         
@@ -5162,7 +5162,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class ActionRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T12, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T13, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T14, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T15> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody || _parameterBinder13.IsBody || _parameterBinder14.IsBody || _parameterBinder15.IsBody;
         
@@ -5475,7 +5475,7 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class FuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
+    sealed class FuncRequestDelegateClosure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T0, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T5, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T6, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T7, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T8, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T9, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T10, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T11, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T12, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T13, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T14, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]T15, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody || _parameterBinder13.IsBody || _parameterBinder14.IsBody || _parameterBinder15.IsBody;
         
