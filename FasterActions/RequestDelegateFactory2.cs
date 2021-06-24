@@ -9,34 +9,30 @@ namespace Microsoft.AspNetCore.Http
 {
     public static partial class RequestDelegateFactory2
     {
-        public static RequestDelegate CreateRequestDelegate<T0>(Action<T0> func)
+        public static RequestDelegate CreateRequestDelegate<T0>(Action<T0> func, IServiceProvider serviceProvider)
         {
-            return CreateRequestDelegateCore(new ActionRequestDelegateClosure<T0>(func, func.Method.GetParameters()));
+            return CreateRequestDelegateCore(new ActionRequestDelegateClosure<T0>(func, func.Method.GetParameters(), serviceProvider));
         }
 
-        public static RequestDelegate CreateRequestDelegate<R>(Func<R> func)
+        public static RequestDelegate CreateRequestDelegate<R>(Func<R> func, IServiceProvider serviceProvider)
         {
-            return CreateRequestDelegateCore(new FuncRequestDelegateClosure<R>(func, func.Method.GetParameters()));
+            return CreateRequestDelegateCore(new FuncRequestDelegateClosure<R>(func, func.Method.GetParameters(), serviceProvider));
         }
 
-        public static RequestDelegate CreateRequestDelegate<T0, R>(Func<T0, R> func)
+        public static RequestDelegate CreateRequestDelegate<T0, R>(Func<T0, R> func, IServiceProvider serviceProvider)
         {
             var parameters = func.Method.GetParameters();
 
-            RequestDelegateClosure closure = HasBindingAttributes(parameters) ?
-                new TypeOnlyFuncRequestDelegateClosure<T0, R>(func, parameters) :
-                new FuncRequestDelegateClosure<T0, R>(func, parameters);
+            RequestDelegateClosure closure = new FuncRequestDelegateClosure<T0, R>(func, parameters, serviceProvider);
 
             return CreateRequestDelegateCore(closure);
         }
 
-        public static RequestDelegate CreateRequestDelegate<T0, T1, R>(Func<T0, T1, R> func)
+        public static RequestDelegate CreateRequestDelegate<T0, T1, R>(Func<T0, T1, R> func, IServiceProvider serviceProvider)
         {
             var parameters = func.Method.GetParameters();
 
-            RequestDelegateClosure closure = HasBindingAttributes(parameters) ?
-                new TypeOnlyFuncRequestDelegateClosure<T0, T1, R>(func, parameters) :
-                new FuncRequestDelegateClosure<T0, T1, R>(func, parameters);
+            RequestDelegateClosure closure = new FuncRequestDelegateClosure<T0, T1, R>(func, parameters, serviceProvider);
 
             return CreateRequestDelegateCore(closure);
         }
@@ -58,7 +54,7 @@ namespace Microsoft.AspNetCore.Http
         }
 
         // This overload isn't linker friendly
-        public static RequestDelegate CreateRequestDelegate(MethodInfo method)
+        public static RequestDelegate CreateRequestDelegate(MethodInfo method, IServiceProvider serviceProvider)
         {
             var parameters = method.GetParameters();
             var parameterTypes = new Type[parameters.Length];
@@ -90,34 +86,31 @@ namespace Microsoft.AspNetCore.Http
 
                     var @delegate = method.CreateDelegate(typeof(Func<>).MakeGenericType(methodInvokerTypes));
 
-                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate)!;
+                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, parameters, @delegate, serviceProvider)!;
                 }
                 else if (parameterTypes.Length == 1)
                 {
-                    var type = hasAttributes ? typeof(FuncRequestDelegateClosure<,>).MakeGenericType(methodInvokerTypes) :
-                                               typeof(TypeOnlyFuncRequestDelegateClosure<,>).MakeGenericType(methodInvokerTypes);
+                    var type = typeof(FuncRequestDelegateClosure<,>).MakeGenericType(methodInvokerTypes);
 
                     var @delegate = method.CreateDelegate(typeof(Func<,>).MakeGenericType(methodInvokerTypes));
 
-                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters)!;
+                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters, serviceProvider)!;
                 }
                 else if (parameterTypes.Length == 2)
                 {
-                    var type = hasAttributes ? typeof(FuncRequestDelegateClosure<,,>).MakeGenericType(methodInvokerTypes) :
-                                               typeof(TypeOnlyFuncRequestDelegateClosure<,,>).MakeGenericType(methodInvokerTypes);
+                    var type = typeof(FuncRequestDelegateClosure<,,>).MakeGenericType(methodInvokerTypes);
 
                     var @delegate = method.CreateDelegate(typeof(Func<,,>).MakeGenericType(methodInvokerTypes));
 
-                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters)!;
+                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters, serviceProvider)!;
                 }
                 else if (parameterTypes.Length == 3)
                 {
-                    var type = hasAttributes ? typeof(FuncRequestDelegateClosure<,,,>).MakeGenericType(methodInvokerTypes) :
-                                               typeof(TypeOnlyFuncRequestDelegateClosure<,,,>).MakeGenericType(methodInvokerTypes);
+                    var type = typeof(FuncRequestDelegateClosure<,,,>).MakeGenericType(methodInvokerTypes);
 
                     var @delegate = method.CreateDelegate(typeof(Func<,,,>).MakeGenericType(methodInvokerTypes));
 
-                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters)!;
+                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters, serviceProvider)!;
                 }
             }
             else
@@ -128,7 +121,7 @@ namespace Microsoft.AspNetCore.Http
 
                     var @delegate = method.CreateDelegate(typeof(Action<,>).MakeGenericType(methodInvokerTypes));
 
-                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters)!;
+                    closure = (RequestDelegateClosure)Activator.CreateInstance(type, @delegate, parameters, serviceProvider)!;
                 }
             }
 

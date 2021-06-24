@@ -12,13 +12,15 @@ class TodoApi
         {
             using var db = new TodoDbContext(options);
             return await db.Todos.ToListAsync();
-        }));
+        }, 
+        routes.ServiceProvider));
 
         routes.MapGet("/todos/{id}", RequestDelegateFactory2.CreateRequestDelegate(async (int id) =>
         {
             using var db = new TodoDbContext(options);
             return await db.Todos.FindAsync(id) is Todo todo ? Ok(todo) : NotFound();
-        }))
+        },
+        routes.ServiceProvider))
         .WithMetadata(new EndpointNameMetadata("todos"));
 
         routes.MapPost("/todos", RequestDelegateFactory2.CreateRequestDelegate(async (Todo todo) =>
@@ -28,7 +30,8 @@ class TodoApi
             await db.SaveChangesAsync();
 
             return CreatedAt(todo, "todos", new { id = todo.Id });
-        }));
+        },
+        routes.ServiceProvider));
 
         routes.MapDelete("/todos/{id}", RequestDelegateFactory2.CreateRequestDelegate(async (int id) =>
         {
@@ -43,6 +46,7 @@ class TodoApi
             await db.SaveChangesAsync();
 
             return Ok();
-        }));
+        },
+        routes.ServiceProvider));
     }
 }

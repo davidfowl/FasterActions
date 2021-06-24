@@ -51,8 +51,6 @@ namespace CodeGenerator
             {
                 GenerateDelegateClosure(arity, hasReturnType: false);
                 GenerateDelegateClosure(arity, hasReturnType: true);
-                GenerateTypeOnlyDelegateClosure(arity, hasReturnType: false);
-                GenerateTypeOnlyDelegateClosure(arity, hasReturnType: true);
             }
 
             Unindent();
@@ -221,14 +219,14 @@ namespace CodeGenerator
             WriteLine();
             Write($"public {typeName}(");
             WriteFuncOrActionType(arity, hasReturnType);
-            WriteLine(" @delegate, System.Reflection.ParameterInfo[] parameters)");
+            WriteLine(" @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)");
             WriteLine("{");
             Indent();
             WriteLine("_delegate = @delegate;");
 
             for (int j = 0; j < arity; j++)
             {
-                WriteLine($"_parameterBinder{j} = Microsoft.AspNetCore.Http.ParameterBinder<T{j}>.Create(parameters[{j}]);");
+                WriteLine($"_parameterBinder{j} = Microsoft.AspNetCore.Http.ParameterBinder<T{j}>.Create(parameters[{j}], serviceProvider);");
             }
             Unindent();
             WriteLine("}"); //ctor

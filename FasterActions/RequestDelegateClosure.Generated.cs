@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Http
         
         private readonly System.Action _delegate;
         
-        public ActionRequestDelegateClosure(System.Action @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
         }
@@ -42,57 +42,7 @@ namespace Microsoft.AspNetCore.Http
         
         private readonly System.Func<R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            R? result = _delegate();
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            R? result = _delegate();
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
-    sealed class TypeOnlyActionRequestDelegateClosure : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => false;
-        
-        private readonly System.Action _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            _delegate();
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            _delegate();
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => false;
-        
-        private readonly System.Func<R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
         }
@@ -119,10 +69,10 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T0> _parameterBinder0;
         private readonly System.Action<T0> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -162,10 +112,10 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T0> _parameterBinder0;
         private readonly System.Func<T0, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -200,94 +150,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly System.Action<T0> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly System.Func<T0, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody;
@@ -296,11 +158,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T1> _parameterBinder1;
         private readonly System.Action<T0, T1> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -357,11 +219,11 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T1> _parameterBinder1;
         private readonly System.Func<T0, T1, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -412,130 +274,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly System.Action<T0, T1> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly System.Func<T0, T1, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody;
@@ -545,12 +283,12 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T2> _parameterBinder2;
         private readonly System.Action<T0, T1, T2> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -624,12 +362,12 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T2> _parameterBinder2;
         private readonly System.Func<T0, T1, T2, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -696,166 +434,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly System.Action<T0, T1, T2> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly System.Func<T0, T1, T2, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody;
@@ -866,13 +444,13 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T3> _parameterBinder3;
         private readonly System.Action<T0, T1, T2, T3> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -963,13 +541,13 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T3> _parameterBinder3;
         private readonly System.Func<T0, T1, T2, T3, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -1052,202 +630,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly System.Action<T0, T1, T2, T3> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly System.Func<T0, T1, T2, T3, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody;
@@ -1259,14 +641,14 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T4> _parameterBinder4;
         private readonly System.Action<T0, T1, T2, T3, T4> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -1374,14 +756,14 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T4> _parameterBinder4;
         private readonly System.Func<T0, T1, T2, T3, T4, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -1480,238 +862,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly System.Action<T0, T1, T2, T3, T4> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly System.Func<T0, T1, T2, T3, T4, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody;
@@ -1724,15 +874,15 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T5> _parameterBinder5;
         private readonly System.Action<T0, T1, T2, T3, T4, T5> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -1857,15 +1007,15 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T5> _parameterBinder5;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -1980,274 +1130,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody;
@@ -2261,16 +1143,16 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T6> _parameterBinder6;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -2412,16 +1294,16 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T6> _parameterBinder6;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -2552,310 +1434,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody;
@@ -2870,17 +1448,17 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T7> _parameterBinder7;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -3039,17 +1617,17 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T7> _parameterBinder7;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -3196,346 +1774,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody;
@@ -3551,18 +1789,18 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T8> _parameterBinder8;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -3738,18 +1976,18 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T8> _parameterBinder8;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -3912,382 +2150,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody;
@@ -4304,19 +2166,19 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T9> _parameterBinder9;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -4509,19 +2371,19 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T9> _parameterBinder9;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -4700,418 +2562,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody;
@@ -5129,20 +2579,20 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T10> _parameterBinder10;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -5352,20 +2802,20 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T10> _parameterBinder10;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -5560,454 +3010,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody;
@@ -6026,21 +3028,21 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T11> _parameterBinder11;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -6267,21 +3269,21 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T11> _parameterBinder11;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -6492,490 +3494,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody;
@@ -6995,22 +3513,22 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T12> _parameterBinder12;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
-            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
+            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -7254,22 +3772,22 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T12> _parameterBinder12;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
-            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
+            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -7496,526 +4014,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T12>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly string _name12;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-            _name12 = parameters[12].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T12>.TryBindValueBasedOnType(httpContext, _name12, out var arg12))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T12? arg12, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T12>.BindBodyBasedOnType(httpContext, _name12);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T12>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly string _name12;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-            _name12 = parameters[12].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T12>.TryBindValueBasedOnType(httpContext, _name12, out var arg12))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T12? arg12, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T12>.BindBodyBasedOnType(httpContext, _name12);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody || _parameterBinder13.IsBody;
@@ -8036,23 +4034,23 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T13> _parameterBinder13;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
-            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12]);
-            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
+            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12], serviceProvider);
+            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -8313,23 +4311,23 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T13> _parameterBinder13;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
-            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12]);
-            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
+            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12], serviceProvider);
+            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -8572,562 +4570,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T12>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T13>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly string _name12;
-        private readonly string _name13;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-            _name12 = parameters[12].Name!;
-            _name13 = parameters[13].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T12>.TryBindValueBasedOnType(httpContext, _name12, out var arg12))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T13>.TryBindValueBasedOnType(httpContext, _name13, out var arg13))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T12? arg12, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T12>.BindBodyBasedOnType(httpContext, _name12);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T13? arg13, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T13>.BindBodyBasedOnType(httpContext, _name13);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T12>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T13>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly string _name12;
-        private readonly string _name13;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-            _name12 = parameters[12].Name!;
-            _name13 = parameters[13].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T12>.TryBindValueBasedOnType(httpContext, _name12, out var arg12))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T13>.TryBindValueBasedOnType(httpContext, _name13, out var arg13))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T12? arg12, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T12>.BindBodyBasedOnType(httpContext, _name12);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T13? arg13, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T13>.BindBodyBasedOnType(httpContext, _name13);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody || _parameterBinder13.IsBody || _parameterBinder14.IsBody;
@@ -9149,24 +4591,24 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T14> _parameterBinder14;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
-            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12]);
-            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13]);
-            _parameterBinder14 = Microsoft.AspNetCore.Http.ParameterBinder<T14>.Create(parameters[14]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
+            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12], serviceProvider);
+            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13], serviceProvider);
+            _parameterBinder14 = Microsoft.AspNetCore.Http.ParameterBinder<T14>.Create(parameters[14], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -9444,24 +4886,24 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T14> _parameterBinder14;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
-            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12]);
-            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13]);
-            _parameterBinder14 = Microsoft.AspNetCore.Http.ParameterBinder<T14>.Create(parameters[14]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
+            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12], serviceProvider);
+            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13], serviceProvider);
+            _parameterBinder14 = Microsoft.AspNetCore.Http.ParameterBinder<T14>.Create(parameters[14], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -9720,598 +5162,6 @@ namespace Microsoft.AspNetCore.Http
         }
     }
     
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T12>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T13>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T14>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly string _name12;
-        private readonly string _name13;
-        private readonly string _name14;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-            _name12 = parameters[12].Name!;
-            _name13 = parameters[13].Name!;
-            _name14 = parameters[14].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T12>.TryBindValueBasedOnType(httpContext, _name12, out var arg12))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T13>.TryBindValueBasedOnType(httpContext, _name13, out var arg13))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T14>.TryBindValueBasedOnType(httpContext, _name14, out var arg14))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T14>(httpContext, _name14);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T12? arg12, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T12>.BindBodyBasedOnType(httpContext, _name12);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T13? arg13, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T13>.BindBodyBasedOnType(httpContext, _name13);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T14? arg14, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T14>.BindBodyBasedOnType(httpContext, _name14);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T14>(httpContext, _name14);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T12>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T13>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T14>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly string _name12;
-        private readonly string _name13;
-        private readonly string _name14;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-            _name12 = parameters[12].Name!;
-            _name13 = parameters[13].Name!;
-            _name14 = parameters[14].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T12>.TryBindValueBasedOnType(httpContext, _name12, out var arg12))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T13>.TryBindValueBasedOnType(httpContext, _name13, out var arg13))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T14>.TryBindValueBasedOnType(httpContext, _name14, out var arg14))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T14>(httpContext, _name14);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T12? arg12, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T12>.BindBodyBasedOnType(httpContext, _name12);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T13? arg13, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T13>.BindBodyBasedOnType(httpContext, _name13);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T14? arg14, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T14>.BindBodyBasedOnType(httpContext, _name14);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T14>(httpContext, _name14);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
     sealed class ActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> : Microsoft.AspNetCore.Http.RequestDelegateClosure
     {
         public override bool HasBody => _parameterBinder0.IsBody || _parameterBinder1.IsBody || _parameterBinder2.IsBody || _parameterBinder3.IsBody || _parameterBinder4.IsBody || _parameterBinder5.IsBody || _parameterBinder6.IsBody || _parameterBinder7.IsBody || _parameterBinder8.IsBody || _parameterBinder9.IsBody || _parameterBinder10.IsBody || _parameterBinder11.IsBody || _parameterBinder12.IsBody || _parameterBinder13.IsBody || _parameterBinder14.IsBody || _parameterBinder15.IsBody;
@@ -10334,25 +5184,25 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T15> _parameterBinder15;
         private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> _delegate;
         
-        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public ActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
-            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12]);
-            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13]);
-            _parameterBinder14 = Microsoft.AspNetCore.Http.ParameterBinder<T14>.Create(parameters[14]);
-            _parameterBinder15 = Microsoft.AspNetCore.Http.ParameterBinder<T15>.Create(parameters[15]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
+            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12], serviceProvider);
+            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13], serviceProvider);
+            _parameterBinder14 = Microsoft.AspNetCore.Http.ParameterBinder<T14>.Create(parameters[14], serviceProvider);
+            _parameterBinder15 = Microsoft.AspNetCore.Http.ParameterBinder<T15>.Create(parameters[15], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -10647,25 +5497,25 @@ namespace Microsoft.AspNetCore.Http
         private readonly Microsoft.AspNetCore.Http.ParameterBinder<T15> _parameterBinder15;
         private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R?> _delegate;
         
-        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
+        public FuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R?> @delegate, System.Reflection.ParameterInfo[] parameters, System.IServiceProvider serviceProvider)
         {
             _delegate = @delegate;
-            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0]);
-            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1]);
-            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2]);
-            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3]);
-            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4]);
-            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5]);
-            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6]);
-            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7]);
-            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8]);
-            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9]);
-            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10]);
-            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11]);
-            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12]);
-            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13]);
-            _parameterBinder14 = Microsoft.AspNetCore.Http.ParameterBinder<T14>.Create(parameters[14]);
-            _parameterBinder15 = Microsoft.AspNetCore.Http.ParameterBinder<T15>.Create(parameters[15]);
+            _parameterBinder0 = Microsoft.AspNetCore.Http.ParameterBinder<T0>.Create(parameters[0], serviceProvider);
+            _parameterBinder1 = Microsoft.AspNetCore.Http.ParameterBinder<T1>.Create(parameters[1], serviceProvider);
+            _parameterBinder2 = Microsoft.AspNetCore.Http.ParameterBinder<T2>.Create(parameters[2], serviceProvider);
+            _parameterBinder3 = Microsoft.AspNetCore.Http.ParameterBinder<T3>.Create(parameters[3], serviceProvider);
+            _parameterBinder4 = Microsoft.AspNetCore.Http.ParameterBinder<T4>.Create(parameters[4], serviceProvider);
+            _parameterBinder5 = Microsoft.AspNetCore.Http.ParameterBinder<T5>.Create(parameters[5], serviceProvider);
+            _parameterBinder6 = Microsoft.AspNetCore.Http.ParameterBinder<T6>.Create(parameters[6], serviceProvider);
+            _parameterBinder7 = Microsoft.AspNetCore.Http.ParameterBinder<T7>.Create(parameters[7], serviceProvider);
+            _parameterBinder8 = Microsoft.AspNetCore.Http.ParameterBinder<T8>.Create(parameters[8], serviceProvider);
+            _parameterBinder9 = Microsoft.AspNetCore.Http.ParameterBinder<T9>.Create(parameters[9], serviceProvider);
+            _parameterBinder10 = Microsoft.AspNetCore.Http.ParameterBinder<T10>.Create(parameters[10], serviceProvider);
+            _parameterBinder11 = Microsoft.AspNetCore.Http.ParameterBinder<T11>.Create(parameters[11], serviceProvider);
+            _parameterBinder12 = Microsoft.AspNetCore.Http.ParameterBinder<T12>.Create(parameters[12], serviceProvider);
+            _parameterBinder13 = Microsoft.AspNetCore.Http.ParameterBinder<T13>.Create(parameters[13], serviceProvider);
+            _parameterBinder14 = Microsoft.AspNetCore.Http.ParameterBinder<T14>.Create(parameters[14], serviceProvider);
+            _parameterBinder15 = Microsoft.AspNetCore.Http.ParameterBinder<T15>.Create(parameters[15], serviceProvider);
         }
         
         public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
@@ -10930,634 +5780,6 @@ namespace Microsoft.AspNetCore.Http
             if (!success)
             {
                 Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed(httpContext, _parameterBinder15);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!, arg15!);
-            
-            await Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-    }
-    
-    sealed class TypeOnlyActionRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T12>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T13>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T14>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T15>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly string _name12;
-        private readonly string _name13;
-        private readonly string _name14;
-        private readonly string _name15;
-        private readonly System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> _delegate;
-        
-        public TypeOnlyActionRequestDelegateClosure(System.Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-            _name12 = parameters[12].Name!;
-            _name13 = parameters[13].Name!;
-            _name14 = parameters[14].Name!;
-            _name15 = parameters[15].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T12>.TryBindValueBasedOnType(httpContext, _name12, out var arg12))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T13>.TryBindValueBasedOnType(httpContext, _name13, out var arg13))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T14>.TryBindValueBasedOnType(httpContext, _name14, out var arg14))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T14>(httpContext, _name14);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T15>.TryBindValueBasedOnType(httpContext, _name15, out var arg15))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T15>(httpContext, _name15);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!, arg15!);
-            
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T12? arg12, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T12>.BindBodyBasedOnType(httpContext, _name12);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T13? arg13, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T13>.BindBodyBasedOnType(httpContext, _name13);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T14? arg14, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T14>.BindBodyBasedOnType(httpContext, _name14);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T14>(httpContext, _name14);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T15? arg15, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T15>.BindBodyBasedOnType(httpContext, _name15);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T15>(httpContext, _name15);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!, arg15!);
-        }
-    }
-    
-    sealed class TypeOnlyFuncRequestDelegateClosure<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> : Microsoft.AspNetCore.Http.RequestDelegateClosure
-    {
-        public override bool HasBody => Microsoft.AspNetCore.Http.ParameterBinder<T0>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T1>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T2>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T3>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T4>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T5>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T6>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T7>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T8>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T9>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T10>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T11>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T12>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T13>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T14>.HasBodyBasedOnType || Microsoft.AspNetCore.Http.ParameterBinder<T15>.HasBodyBasedOnType;
-        
-        private readonly string _name0;
-        private readonly string _name1;
-        private readonly string _name2;
-        private readonly string _name3;
-        private readonly string _name4;
-        private readonly string _name5;
-        private readonly string _name6;
-        private readonly string _name7;
-        private readonly string _name8;
-        private readonly string _name9;
-        private readonly string _name10;
-        private readonly string _name11;
-        private readonly string _name12;
-        private readonly string _name13;
-        private readonly string _name14;
-        private readonly string _name15;
-        private readonly System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R?> _delegate;
-        
-        public TypeOnlyFuncRequestDelegateClosure(System.Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R?> @delegate, System.Reflection.ParameterInfo[] parameters)
-        {
-            _delegate = @delegate;
-            _name0 = parameters[0].Name!;
-            _name1 = parameters[1].Name!;
-            _name2 = parameters[2].Name!;
-            _name3 = parameters[3].Name!;
-            _name4 = parameters[4].Name!;
-            _name5 = parameters[5].Name!;
-            _name6 = parameters[6].Name!;
-            _name7 = parameters[7].Name!;
-            _name8 = parameters[8].Name!;
-            _name9 = parameters[9].Name!;
-            _name10 = parameters[10].Name!;
-            _name11 = parameters[11].Name!;
-            _name12 = parameters[12].Name!;
-            _name13 = parameters[13].Name!;
-            _name14 = parameters[14].Name!;
-            _name15 = parameters[15].Name!;
-        }
-        
-        public override System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T0>.TryBindValueBasedOnType(httpContext, _name0, out var arg0))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T1>.TryBindValueBasedOnType(httpContext, _name1, out var arg1))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T2>.TryBindValueBasedOnType(httpContext, _name2, out var arg2))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T3>.TryBindValueBasedOnType(httpContext, _name3, out var arg3))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T4>.TryBindValueBasedOnType(httpContext, _name4, out var arg4))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T5>.TryBindValueBasedOnType(httpContext, _name5, out var arg5))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T6>.TryBindValueBasedOnType(httpContext, _name6, out var arg6))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T7>.TryBindValueBasedOnType(httpContext, _name7, out var arg7))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T8>.TryBindValueBasedOnType(httpContext, _name8, out var arg8))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T9>.TryBindValueBasedOnType(httpContext, _name9, out var arg9))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T10>.TryBindValueBasedOnType(httpContext, _name10, out var arg10))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T11>.TryBindValueBasedOnType(httpContext, _name11, out var arg11))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T12>.TryBindValueBasedOnType(httpContext, _name12, out var arg12))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T13>.TryBindValueBasedOnType(httpContext, _name13, out var arg13))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T14>.TryBindValueBasedOnType(httpContext, _name14, out var arg14))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T14>(httpContext, _name14);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            if (!Microsoft.AspNetCore.Http.ParameterBinder<T15>.TryBindValueBasedOnType(httpContext, _name15, out var arg15))
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T15>(httpContext, _name15);
-                httpContext.Response.StatusCode = 400;
-                return System.Threading.Tasks.Task.CompletedTask;
-            }
-            
-            R? result = _delegate(arg0!, arg1!, arg2!, arg3!, arg4!, arg5!, arg6!, arg7!, arg8!, arg9!, arg10!, arg11!, arg12!, arg13!, arg14!, arg15!);
-            
-            return Microsoft.AspNetCore.Http.ResultInvoker<R>.Instance.Invoke(httpContext, result);
-        }
-        
-        public override async System.Threading.Tasks.Task ProcessRequestWithBodyAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
-        {
-            var success = false;
-            (T0? arg0, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T0>.BindBodyBasedOnType(httpContext, _name0);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T0>(httpContext, _name0);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T1? arg1, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T1>.BindBodyBasedOnType(httpContext, _name1);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T1>(httpContext, _name1);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T2? arg2, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T2>.BindBodyBasedOnType(httpContext, _name2);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T2>(httpContext, _name2);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T3? arg3, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T3>.BindBodyBasedOnType(httpContext, _name3);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T3>(httpContext, _name3);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T4? arg4, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T4>.BindBodyBasedOnType(httpContext, _name4);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T4>(httpContext, _name4);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T5? arg5, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T5>.BindBodyBasedOnType(httpContext, _name5);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T5>(httpContext, _name5);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T6? arg6, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T6>.BindBodyBasedOnType(httpContext, _name6);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T6>(httpContext, _name6);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T7? arg7, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T7>.BindBodyBasedOnType(httpContext, _name7);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T7>(httpContext, _name7);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T8? arg8, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T8>.BindBodyBasedOnType(httpContext, _name8);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T8>(httpContext, _name8);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T9? arg9, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T9>.BindBodyBasedOnType(httpContext, _name9);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T9>(httpContext, _name9);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T10? arg10, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T10>.BindBodyBasedOnType(httpContext, _name10);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T10>(httpContext, _name10);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T11? arg11, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T11>.BindBodyBasedOnType(httpContext, _name11);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T11>(httpContext, _name11);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T12? arg12, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T12>.BindBodyBasedOnType(httpContext, _name12);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T12>(httpContext, _name12);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T13? arg13, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T13>.BindBodyBasedOnType(httpContext, _name13);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T13>(httpContext, _name13);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T14? arg14, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T14>.BindBodyBasedOnType(httpContext, _name14);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T14>(httpContext, _name14);
-                httpContext.Response.StatusCode = 400;
-                return;
-            }
-            
-            (T15? arg15, success) = await Microsoft.AspNetCore.Http.ParameterBinder<T15>.BindBodyBasedOnType(httpContext, _name15);
-            
-            if (!success)
-            {
-                Microsoft.AspNetCore.Http.ParameterLog.ParameterBindingFailed<T15>(httpContext, _name15);
                 httpContext.Response.StatusCode = 400;
                 return;
             }

@@ -22,7 +22,7 @@ TodoApi.MapRoutes(app, options);
 
 // Create a RequestDelegate, the ASP.NET primitive for handling requests from the
 // specified delegate
-RequestDelegate rd = RequestDelegateFactory2.CreateRequestDelegate(typeof(Foo).GetMethod(nameof(Foo.Hello))!);
+RequestDelegate rd = RequestDelegateFactory2.CreateRequestDelegate(typeof(Foo).GetMethod(nameof(Foo.Hello))!, app.Services);
 
 // Map this delegate to the path /
 app.MapGet("/", rd);

@@ -32,62 +32,6 @@ namespace Microsoft.AspNetCore.Http
 
         private static readonly TryParse? _tryParse = FindTryParseMethod();
 
-        public static bool HasBodyBasedOnType =>
-                typeof(T) != typeof(string) &&
-                typeof(T) != typeof(byte) &&
-                typeof(T) != typeof(short) &&
-                typeof(T) != typeof(int) &&
-                typeof(T) != typeof(long) &&
-                typeof(T) != typeof(decimal) &&
-                typeof(T) != typeof(double) &&
-                typeof(T) != typeof(float) &&
-                typeof(T) != typeof(Guid) &&
-                typeof(T) != typeof(DateTime) &&
-                typeof(T) != typeof(DateTimeOffset) &&
-                typeof(T) != typeof(HttpContext) &&
-                typeof(T) != typeof(CancellationToken) &&
-                !typeof(T).IsInterface &&
-                !typeof(T).IsEnum &&
-                _tryParse == null;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryBindValueBasedOnType(HttpContext httpContext, string name, [MaybeNullWhen(false)] out T value)
-        {
-            if (typeof(T) == typeof(string) ||
-                typeof(T) == typeof(byte) ||
-                typeof(T) == typeof(short) ||
-                typeof(T) == typeof(int) ||
-                typeof(T) == typeof(long) ||
-                typeof(T) == typeof(decimal) ||
-                typeof(T) == typeof(double) ||
-                typeof(T) == typeof(float) ||
-                typeof(T) == typeof(Guid) ||
-                typeof(T) == typeof(DateTime) ||
-                typeof(T) == typeof(DateTimeOffset))
-            {
-                return RouteOrQueryParameterBinder<T>.TryBindValue(httpContext, name, out value);
-            }
-            else if (typeof(T) == typeof(HttpContext))
-            {
-                return HttpContextParameterBinder<T>.TryBindValue(httpContext, name, out value);
-            }
-            else if (typeof(T) == typeof(CancellationToken))
-            {
-                return CancellationTokenParameterBinder<T>.TryBindValue(httpContext, name, out value);
-            }
-            else if (typeof(T).IsInterface)
-            {
-                return ServicesParameterBinder<T>.TryBindValue(httpContext, name, out value);
-            }
-            else if (typeof(T).IsEnum || _tryParse != null) // Slow fallback for unknown types
-            {
-                return RouteOrQueryParameterBinder<T>.TryBindValue(httpContext, name, out value);
-            }
-
-            value = default;
-            return false;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ValueTask<(T?, bool)> BindBodyBasedOnType(HttpContext httpContext, string name)
         {
@@ -97,21 +41,21 @@ namespace Microsoft.AspNetCore.Http
         // This needs to be inlinable in order for the JIT to see the newobj call in order
         // to enable devirtualization the method might currently be too big for this...
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ParameterBinder<T> Create(ParameterInfo parameterInfo)
+        public static ParameterBinder<T> Create(ParameterInfo parameterInfo, IServiceProvider serviceProvider)
         {
             var parameterCustomAttributes = Attribute.GetCustomAttributes(parameterInfo);
 
             // No attributes fast path
             if (parameterCustomAttributes.Length == 0)
             {
-                return GetParameterBinderBaseOnType(parameterInfo);
+                return GetParameterBinderBaseOnType(parameterInfo, serviceProvider);
             }
 
-            return GetBinderBaseOnAttributes(parameterInfo, parameterCustomAttributes);
+            return GetBinderBaseOnAttributes(parameterInfo, parameterCustomAttributes, serviceProvider);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static ParameterBinder<T> GetBinderBaseOnAttributes(ParameterInfo parameterInfo, Attribute[] parameterCustomAttributes)
+        private static ParameterBinder<T> GetBinderBaseOnAttributes(ParameterInfo parameterInfo, Attribute[] parameterCustomAttributes, IServiceProvider serviceProvider)
         {
             if (parameterCustomAttributes.OfType<IFromRouteMetadata>().FirstOrDefault() is { } routeAttribute)
             {
@@ -134,11 +78,11 @@ namespace Microsoft.AspNetCore.Http
                 return new ServicesParameterBinder<T>(parameterInfo.Name!);
             }
 
-            return GetParameterBinderBaseOnType(parameterInfo);
+            return GetParameterBinderBaseOnType(parameterInfo, serviceProvider);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static ParameterBinder<T> GetParameterBinderBaseOnType(ParameterInfo parameterInfo)
+        private static ParameterBinder<T> GetParameterBinderBaseOnType(ParameterInfo parameterInfo, IServiceProvider serviceProvider)
         {
             if (typeof(T) == typeof(string) ||
                 typeof(T) == typeof(byte) ||
@@ -162,13 +106,13 @@ namespace Microsoft.AspNetCore.Http
             {
                 return new CancellationTokenParameterBinder<T>(parameterInfo.Name!);
             }
-            else if (typeof(T).IsInterface)
-            {
-                return new ServicesParameterBinder<T>(parameterInfo.Name!);
-            }
             else if (typeof(T).IsEnum || _tryParse != null) // Slow fallback for unknown types
             {
                 return new RouteOrQueryParameterBinder<T>(parameterInfo.Name!);
+            }
+            else if (serviceProvider.GetService<IServiceProviderIsService>() is IServiceProviderIsService serviceProviderIsService && serviceProviderIsService.IsService(typeof(T)))
+            {
+                return new ServicesParameterBinder<T>(parameterInfo.Name!);
             }
 
             return new BodyParameterBinder<T>(parameterInfo.Name!, allowEmpty: false);
