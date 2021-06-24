@@ -32,12 +32,6 @@ namespace Microsoft.AspNetCore.Http
 
         private static readonly TryParse? _tryParse = FindTryParseMethod();
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ValueTask<(T?, bool)> BindBodyBasedOnType(HttpContext httpContext, string name)
-        {
-            return BodyParameterBinder<T>.BindBodyOrValueAsync(httpContext, name);
-        }
-
         // This needs to be inlinable in order for the JIT to see the newobj call in order
         // to enable devirtualization the method might currently be too big for this...
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
